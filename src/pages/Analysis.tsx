@@ -8,6 +8,7 @@ import { Header } from "@/components/Header";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import jsPDF from "jspdf";
 
 interface AnalysisResult {
   id: string;
@@ -116,10 +117,72 @@ const Analysis = () => {
   };
 
   const exportToPDF = () => {
-    toast({
-      title: "Export feature coming soon",
-      description: "PDF export will be available in the next update",
-    });
+    try {
+      const doc = new jsPDF();
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const pageHeight = doc.internal.pageSize.getHeight();
+      const margin = 20;
+      let yPos = margin;
+
+      // Title
+      doc.setFontSize(20);
+      doc.text("Performance Analysis Report", margin, yPos);
+      yPos += 15;
+
+      // Stats
+      doc.setFontSize(12);
+      doc.text(`Total Analyses: ${analyses.length}`, margin, yPos);
+      yPos += 7;
+      doc.text(`Green: ${stats.green} | Yellow: ${stats.yellow} | Red: ${stats.red}`, margin, yPos);
+      yPos += 15;
+
+      // Analyses
+      doc.setFontSize(14);
+      doc.text("Detailed Analyses", margin, yPos);
+      yPos += 10;
+
+      analyses.forEach((result, index) => {
+        if (yPos > pageHeight - 40) {
+          doc.addPage();
+          yPos = margin;
+        }
+
+        doc.setFontSize(10);
+        doc.setFont("helvetica", "bold");
+        doc.text(`${index + 1}. ${result.name} - ${result.role}`, margin, yPos);
+        yPos += 6;
+
+        doc.setFont("helvetica", "normal");
+        doc.text(`Score: ${result.score.toUpperCase()}`, margin + 5, yPos);
+        yPos += 6;
+        doc.text(`Blocker: ${result.blocker}`, margin + 5, yPos);
+        yPos += 6;
+
+        const reasonLines = doc.splitTextToSize(`Reason: ${result.reason}`, pageWidth - 2 * margin - 5);
+        doc.text(reasonLines, margin + 5, yPos);
+        yPos += reasonLines.length * 6;
+
+        const messageLines = doc.splitTextToSize(`Message: ${result.message}`, pageWidth - 2 * margin - 5);
+        doc.text(messageLines, margin + 5, yPos);
+        yPos += messageLines.length * 6;
+
+        const nextStepLines = doc.splitTextToSize(`Next Step: ${result.nextStep}`, pageWidth - 2 * margin - 5);
+        doc.text(nextStepLines, margin + 5, yPos);
+        yPos += nextStepLines.length * 6 + 10;
+      });
+
+      doc.save("performance-analysis-report.pdf");
+      toast({
+        title: "Success",
+        description: "PDF report exported successfully",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: "Failed to export PDF",
+        variant: "destructive",
+      });
+    }
   };
 
   const stats = {

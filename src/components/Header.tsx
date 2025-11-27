@@ -28,6 +28,9 @@ export const Header = () => {
             <Link to="/team">Team</Link>
           </Button>
           <Button variant="ghost" asChild>
+            <Link to="/check-ins">Check-ins</Link>
+          </Button>
+          <Button variant="ghost" asChild>
             <Link to="/analysis">Analysis</Link>
           </Button>
           {user && (
