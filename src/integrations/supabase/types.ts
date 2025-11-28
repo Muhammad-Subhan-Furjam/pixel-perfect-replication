@@ -123,8 +123,44 @@ export type Database = {
         }
         Relationships: []
       }
+      team_member_reports: {
+        Row: {
+          created_at: string | null
+          date: string
+          id: string
+          is_read: boolean
+          report_text: string
+          team_member_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          date?: string
+          id?: string
+          is_read?: boolean
+          report_text: string
+          team_member_id: string
+        }
+        Update: {
+          created_at?: string | null
+          date?: string
+          id?: string
+          is_read?: boolean
+          report_text?: string
+          team_member_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "team_member_reports_team_member_id_fkey"
+            columns: ["team_member_id"]
+            isOneToOne: false
+            referencedRelation: "team_members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       team_members: {
         Row: {
+          auth_user_id: string | null
           created_at: string | null
           department: string | null
           id: string
@@ -134,6 +170,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          auth_user_id?: string | null
           created_at?: string | null
           department?: string | null
           id?: string
@@ -143,6 +180,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          auth_user_id?: string | null
           created_at?: string | null
           department?: string | null
           id?: string

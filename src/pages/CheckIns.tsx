@@ -9,13 +9,21 @@ import { Header } from "@/components/Header";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2 } from "lucide-react";
+import { Loader2, Copy } from "lucide-react";
 
 interface TeamMember {
   id: string;
   name: string;
   role: string;
   target_metrics: any;
+}
+
+interface UnreadReport {
+  id: string;
+  report_text: string;
+  date: string;
+  created_at: string;
+  team_member_id: string;
 }
 
 const CheckIns = () => {
@@ -27,10 +35,32 @@ const CheckIns = () => {
   const [notes, setNotes] = useState("");
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [unreadReports, setUnreadReports] = useState<UnreadReport[]>([]);
 
   useEffect(() => {
     if (user) {
       fetchTeamMembers();
+      fetchUnreadReports();
+
+      // Set up realtime subscription for new reports
+      const channel = supabase
+        .channel('new-reports')
+        .on(
+          'postgres_changes',
+          {
+            event: 'INSERT',
+            schema: 'public',
+            table: 'team_member_reports'
+          },
+          () => {
+            fetchUnreadReports();
+          }
+        )
+        .subscribe();
+
+      return () => {
+        supabase.removeChannel(channel);
+      };
     }
   }, [user]);
 
@@ -53,6 +83,51 @@ const CheckIns = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const fetchUnreadReports = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("team_member_reports")
+        .select("*")
+        .eq("is_read", false)
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+      setUnreadReports(data || []);
+    } catch (error: any) {
+      console.error("Error fetching reports:", error);
+    }
+  };
+
+  const handleCopyReport = async (report: UnreadReport) => {
+    // Copy to notes
+    setNotes(report.report_text);
+    
+    // Select the team member
+    setSelectedMember(report.team_member_id);
+    const member = teamMembers.find((m) => m.id === report.team_member_id);
+    if (member?.target_metrics) {
+      const initialMetrics: Record<string, string> = {};
+      Object.keys(member.target_metrics).forEach((key) => {
+        initialMetrics[key] = "";
+      });
+      setMetrics(initialMetrics);
+    }
+
+    // Mark as read
+    await supabase
+      .from("team_member_reports")
+      .update({ is_read: true })
+      .eq("id", report.id);
+
+    // Refresh reports
+    fetchUnreadReports();
+
+    toast({
+      title: "Report Copied",
+      description: "The report has been copied to the notes field",
+    });
   };
 
   const handleMemberSelect = (memberId: string) => {
@@ -150,6 +225,44 @@ const CheckIns = () => {
           <h2 className="text-3xl font-bold mb-2">Daily Check-ins</h2>
           <p className="text-muted-foreground">Submit daily performance metrics for team members</p>
         </div>
+
+        {unreadReports.length > 0 && (
+          <Card className="mb-6 border-primary">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <span className="animate-pulse">🔔</span> New Team Member Reports
+              </CardTitle>
+              <CardDescription>Click to copy and analyze reports</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {unreadReports.map((report) => {
+                  const member = teamMembers.find(m => m.id === report.team_member_id);
+                  return (
+                    <div
+                      key={report.id}
+                      className="border rounded-lg p-4 hover:bg-muted cursor-pointer transition-colors"
+                      onClick={() => handleCopyReport(report)}
+                    >
+                      <div className="flex justify-between items-start mb-2">
+                        <span className="font-semibold">{member?.name || "Unknown"}</span>
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs text-muted-foreground">
+                            {new Date(report.created_at).toLocaleString()}
+                          </span>
+                          <Copy className="h-4 w-4 text-primary" />
+                        </div>
+                      </div>
+                      <p className="text-sm text-muted-foreground line-clamp-2">
+                        {report.report_text}
+                      </p>
+                    </div>
+                  );
+                })}
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {loading ? (
           <div className="flex justify-center items-center py-12">
