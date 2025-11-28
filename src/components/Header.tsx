@@ -1,12 +1,13 @@
 import { Button } from "@/components/ui/button";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { useEffect, useState } from "react";
 import logo from "@/assets/logo.png";
 import { LogOut } from "lucide-react";
 import { NotificationBell } from "./NotificationBell";
 
 export const Header = () => {
-  const { user, signOut } = useAuth();
+  const { user, userRole, signOut } = useAuth();
   const navigate = useNavigate();
 
   const handleSignOut = async () => {
@@ -22,24 +23,28 @@ export const Header = () => {
           <h1 className="text-xl font-bold">ResultsBoard</h1>
         </div>
         <nav className="flex items-center space-x-4">
-          <Button variant="ghost" asChild>
-            <Link to="/dashboard">Dashboard</Link>
-          </Button>
-          <Button variant="ghost" asChild>
-            <Link to="/team">Team</Link>
-          </Button>
-          <Button variant="ghost" asChild>
-            <Link to="/check-ins">Check-ins</Link>
-          </Button>
-          <Button variant="ghost" asChild>
-            <Link to="/analysis">Analysis</Link>
-          </Button>
+          {userRole === 'ceo' && (
+            <>
+              <Button variant="ghost" asChild>
+                <Link to="/dashboard">Dashboard</Link>
+              </Button>
+              <Button variant="ghost" asChild>
+                <Link to="/team">Team</Link>
+              </Button>
+              <Button variant="ghost" asChild>
+                <Link to="/check-ins">Check-ins</Link>
+              </Button>
+              <Button variant="ghost" asChild>
+                <Link to="/analysis">Analysis</Link>
+              </Button>
+            </>
+          )}
           <Button variant="ghost" asChild>
             <Link to="/reports">Reports</Link>
           </Button>
           {user && (
             <>
-              <NotificationBell />
+              {userRole === 'ceo' && <NotificationBell />}
               <Button variant="outline" onClick={handleSignOut}>
                 <LogOut className="h-4 w-4 mr-2" />
                 Sign Out
