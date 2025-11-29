@@ -5,13 +5,13 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
 import { ProtectedRoute } from "./components/ProtectedRoute";
+import { ReportsRouter } from "./components/ReportsRouter";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import Team from "./pages/Team";
 import CheckIns from "./pages/CheckInsNew";
 import Analysis from "./pages/Analysis";
-import Reports from "./pages/ReportsNew";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -48,7 +48,8 @@ const App = () => (
             } />
             <Route path="/reports" element={
               <ProtectedRoute allowedRoles={['ceo', 'team_member']}>
-                <Reports />
+                {/* This will be handled by the component based on role */}
+                <ReportsRouter />
               </ProtectedRoute>
             } />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

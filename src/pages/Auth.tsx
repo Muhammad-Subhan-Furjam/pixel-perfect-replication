@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
@@ -16,6 +17,9 @@ const Auth = () => {
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
   const [role, setRole] = useState<"ceo" | "team_member">("team_member");
+  const [jobRole, setJobRole] = useState("");
+  const [department, setDepartment] = useState("");
+  const [kpiTargets, setKpiTargets] = useState("");
   const [loading, setLoading] = useState(false);
   const [ceoExists, setCeoExists] = useState(false);
   const navigate = useNavigate();
@@ -98,9 +102,9 @@ const Auth = () => {
                 user_id: signUpData.user.id,
                 auth_user_id: signUpData.user.id,
                 name: fullName,
-                role: 'Team Member',
-                department: null,
-                target_metrics: {}
+                role: jobRole || 'Team Member',
+                department: department || null,
+                target_metrics: kpiTargets ? JSON.parse(kpiTargets) : {}
               });
 
             if (teamMemberError) throw teamMemberError;
@@ -155,10 +159,10 @@ const Auth = () => {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="role">Role</Label>
+                  <Label htmlFor="role">Account Type</Label>
                   <Select value={role} onValueChange={(value: "ceo" | "team_member") => setRole(value)}>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select your role" />
+                      <SelectValue placeholder="Select your account type" />
                     </SelectTrigger>
                     <SelectContent>
                       {!ceoExists && <SelectItem value="ceo">CEO / Manager</SelectItem>}
@@ -171,6 +175,44 @@ const Auth = () => {
                     </p>
                   )}
                 </div>
+                {role === 'team_member' && (
+                  <>
+                    <div className="space-y-2">
+                      <Label htmlFor="jobRole">Role</Label>
+                      <Input
+                        id="jobRole"
+                        type="text"
+                        placeholder="e.g., Software Engineer, Designer"
+                        value={jobRole}
+                        onChange={(e) => setJobRole(e.target.value)}
+                        required
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="department">Department</Label>
+                      <Input
+                        id="department"
+                        type="text"
+                        placeholder="e.g., Engineering, Marketing"
+                        value={department}
+                        onChange={(e) => setDepartment(e.target.value)}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="kpiTargets">KPI Targets (JSON format)</Label>
+                      <Textarea
+                        id="kpiTargets"
+                        placeholder='e.g., {"sales": 100, "tasks": 50}'
+                        value={kpiTargets}
+                        onChange={(e) => setKpiTargets(e.target.value)}
+                        rows={3}
+                      />
+                      <p className="text-xs text-muted-foreground">
+                        Enter your performance targets in JSON format
+                      </p>
+                    </div>
+                  </>
+                )}
               </>
             )}
             <div className="space-y-2">
