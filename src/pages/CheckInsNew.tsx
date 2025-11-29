@@ -9,7 +9,8 @@ import { Header } from "@/components/Header";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2 } from "lucide-react";
+import { Loader2, Trash2, TrendingUp } from "lucide-react";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 
 interface TeamMember {
   id: string;
@@ -41,6 +42,10 @@ const CheckIns = () => {
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [unreadReports, setUnreadReports] = useState<UnreadReport[]>([]);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [reportToDelete, setReportToDelete] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState(false);
+  const [analyzing, setAnalyzing] = useState<string | null>(null);
 
   useEffect(() => {
     if (user) {
@@ -221,6 +226,112 @@ const CheckIns = () => {
     }
   };
 
+  const handleDeleteReport = async () => {
+    if (!reportToDelete) return;
+
+    setDeleting(true);
+    try {
+      const { error } = await supabase
+        .from("team_member_reports")
+        .delete()
+        .eq("id", reportToDelete);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Report deleted successfully",
+      });
+
+      fetchUnreadReports();
+      if (selectedReport?.id === reportToDelete) {
+        setSelectedReport(null);
+        setSelectedMember("");
+        setNotes("");
+      }
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setDeleting(false);
+      setDeleteDialogOpen(false);
+      setReportToDelete(null);
+    }
+  };
+
+  const handleAnalyzeReport = async (report: UnreadReport) => {
+    setAnalyzing(report.id);
+    
+    try {
+      const member = teamMembers.find((m) => m.id === report.team_member_id);
+      if (!member) throw new Error("Team member not found");
+
+      // Create metrics object with empty values since we're analyzing the report text
+      const emptyMetrics: Record<string, string> = {};
+      if (member.target_metrics) {
+        Object.keys(member.target_metrics).forEach((key) => {
+          emptyMetrics[key] = "N/A";
+        });
+      }
+
+      // Insert check-in
+      const { data: checkIn, error: checkInError } = await supabase
+        .from("check_ins")
+        .insert({
+          user_id: user!.id,
+          team_member_id: report.team_member_id,
+          metrics: emptyMetrics,
+          notes: report.report_text,
+          date: new Date().toISOString().split('T')[0],
+        })
+        .select()
+        .single();
+
+      if (checkInError) throw checkInError;
+
+      // Call AI analysis edge function
+      const { data: analysis, error: analysisError } = await supabase.functions.invoke(
+        "analyze-performance",
+        {
+          body: {
+            checkInId: checkIn.id,
+            teamMemberName: member.name,
+            role: member.role,
+            metrics: emptyMetrics,
+            notes: report.report_text,
+            language: "en",
+          },
+        }
+      );
+
+      if (analysisError) throw analysisError;
+
+      // Mark report as read
+      await supabase
+        .from("team_member_reports")
+        .update({ is_read: true })
+        .eq("id", report.id);
+
+      toast({
+        title: "Success",
+        description: "Report analyzed successfully. Check the Analysis page for results.",
+      });
+
+      fetchUnreadReports();
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setAnalyzing(null);
+    }
+  };
+
   const selectedMemberData = teamMembers.find((m) => m.id === selectedMember);
 
   return (
@@ -248,19 +359,56 @@ const CheckIns = () => {
                   {unreadReports.map((report) => (
                     <div
                       key={report.id}
-                      className={`border rounded-lg p-3 cursor-pointer transition-colors hover:bg-muted ${
+                      className={`border rounded-lg p-3 transition-colors ${
                         selectedReport?.id === report.id ? 'bg-muted border-primary' : ''
                       }`}
-                      onClick={() => handleReportSelect(report)}
                     >
-                      <div className="font-semibold text-sm mb-1">
-                        {report.team_members?.name || "Unknown"}
+                      <div 
+                        className="cursor-pointer mb-2"
+                        onClick={() => handleReportSelect(report)}
+                      >
+                        <div className="font-semibold text-sm mb-1">
+                          {report.team_members?.name || "Unknown"}
+                        </div>
+                        <div className="text-xs text-muted-foreground mb-1">
+                          {report.team_members?.role}
+                        </div>
+                        <div className="text-xs text-muted-foreground">
+                          {new Date(report.created_at).toLocaleDateString()} • {new Date(report.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        </div>
                       </div>
-                      <div className="text-xs text-muted-foreground mb-1">
-                        {report.team_members?.role}
-                      </div>
-                      <div className="text-xs text-muted-foreground">
-                        {new Date(report.created_at).toLocaleDateString()} • {new Date(report.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      <div className="flex gap-2 mt-2">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="flex-1"
+                          onClick={() => handleAnalyzeReport(report)}
+                          disabled={analyzing === report.id}
+                        >
+                          {analyzing === report.id ? (
+                            <>
+                              <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                              Analyzing...
+                            </>
+                          ) : (
+                            <>
+                              <TrendingUp className="h-3 w-3 mr-1" />
+                              Analyze
+                            </>
+                          )}
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="destructive"
+                          className="flex-1"
+                          onClick={() => {
+                            setReportToDelete(report.id);
+                            setDeleteDialogOpen(true);
+                          }}
+                        >
+                          <Trash2 className="h-3 w-3 mr-1" />
+                          Delete
+                        </Button>
                       </div>
                     </div>
                   ))}
@@ -346,6 +494,34 @@ const CheckIns = () => {
           )}
         </div>
       </main>
+
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Report?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete this report. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleDeleteReport} 
+              disabled={deleting}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deleting ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Deleting...
+                </>
+              ) : (
+                "Delete Report"
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
