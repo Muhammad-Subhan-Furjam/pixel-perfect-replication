@@ -17,6 +17,7 @@ const Auth = () => {
   const [fullName, setFullName] = useState("");
   const [role, setRole] = useState<"ceo" | "team_member">("team_member");
   const [loading, setLoading] = useState(false);
+  const [ceoExists, setCeoExists] = useState(false);
   const navigate = useNavigate();
   const { user } = useAuth();
   const { toast } = useToast();
@@ -25,7 +26,24 @@ const Auth = () => {
     if (user) {
       navigate("/dashboard");
     }
+    // Check if CEO already exists
+    checkCeoExists();
   }, [user, navigate]);
+
+  const checkCeoExists = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('user_roles')
+        .select('id')
+        .eq('role', 'ceo')
+        .maybeSingle();
+      
+      if (error) throw error;
+      setCeoExists(!!data);
+    } catch (error: any) {
+      console.error('Error checking CEO:', error);
+    }
+  };
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -71,6 +89,22 @@ const Auth = () => {
             });
 
           if (roleError) throw roleError;
+
+          // If team member, create team_members record
+          if (role === 'team_member') {
+            const { error: teamMemberError } = await supabase
+              .from('team_members')
+              .insert({
+                user_id: signUpData.user.id,
+                auth_user_id: signUpData.user.id,
+                name: fullName,
+                role: 'Team Member',
+                department: null,
+                target_metrics: {}
+              });
+
+            if (teamMemberError) throw teamMemberError;
+          }
         }
 
         toast({
@@ -127,10 +161,15 @@ const Auth = () => {
                       <SelectValue placeholder="Select your role" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="ceo">CEO / Manager</SelectItem>
+                      {!ceoExists && <SelectItem value="ceo">CEO / Manager</SelectItem>}
                       <SelectItem value="team_member">Team Member</SelectItem>
                     </SelectContent>
                   </Select>
+                  {ceoExists && (
+                    <p className="text-xs text-muted-foreground">
+                      CEO account already exists. You can only register as a Team Member.
+                    </p>
+                  )}
                 </div>
               </>
             )}

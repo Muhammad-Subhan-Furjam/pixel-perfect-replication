@@ -1,11 +1,14 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, ClipboardCheck, TrendingUp, AlertCircle, Loader2 } from "lucide-react";
+import { Users, ClipboardCheck, TrendingUp, AlertCircle, Loader2, Trash2 } from "lucide-react";
 import { Header } from "@/components/Header";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { formatDistanceToNow } from "date-fns";
+import { Button } from "@/components/ui/button";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { useNavigate } from "react-router-dom";
 
 interface Analysis {
   id: string;
@@ -28,10 +31,13 @@ interface CheckIn {
 const Dashboard = () => {
   const { user } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [analyses, setAnalyses] = useState<Analysis[]>([]);
   const [checkIns, setCheckIns] = useState<CheckIn[]>([]);
   const [teamMemberCount, setTeamMemberCount] = useState(0);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -118,14 +124,55 @@ const Dashboard = () => {
     };
   });
 
+  const handleDeleteAccount = async () => {
+    if (!user) return;
+    
+    setDeleting(true);
+    try {
+      // Delete all user-related data first
+      await supabase.from('team_members').delete().eq('user_id', user.id);
+      await supabase.from('check_ins').delete().eq('user_id', user.id);
+      await supabase.from('analyses').delete().eq('user_id', user.id);
+      await supabase.from('user_roles').delete().eq('user_id', user.id);
+
+      toast({
+        title: "Account Deleted",
+        description: "Your account has been permanently deleted.",
+      });
+
+      // Sign out and redirect
+      await supabase.auth.signOut();
+      navigate('/auth');
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to delete account",
+        variant: "destructive",
+      });
+    } finally {
+      setDeleting(false);
+      setDeleteDialogOpen(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
 
       <main className="container mx-auto px-4 py-8">
-        <div className="mb-8">
-          <h2 className="text-3xl font-bold mb-2">Good morning, CEO</h2>
-          <p className="text-muted-foreground">Here's what's happening with your team today</p>
+        <div className="mb-8 flex items-center justify-between">
+          <div>
+            <h2 className="text-3xl font-bold mb-2">Good morning, CEO</h2>
+            <p className="text-muted-foreground">Here's what's happening with your team today</p>
+          </div>
+          <Button 
+            variant="destructive" 
+            size="sm"
+            onClick={() => setDeleteDialogOpen(true)}
+          >
+            <Trash2 className="h-4 w-4 mr-2" />
+            Delete Account
+          </Button>
         </div>
 
         {loading ? (
@@ -208,6 +255,34 @@ const Dashboard = () => {
           </>
         )}
       </main>
+
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Your Account?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete your CEO account and all associated data. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleDeleteAccount} 
+              disabled={deleting}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deleting ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Deleting...
+                </>
+              ) : (
+                "Delete Account"
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

@@ -14,6 +14,7 @@ interface TeamMember {
   role: string;
   department: string;
   target_metrics: Record<string, string | number>;
+  auth_user_id?: string | null;
 }
 
 interface TeamMemberDialogProps {
@@ -32,20 +33,25 @@ export const TeamMemberDialog = ({ open, onOpenChange, member, onSuccess }: Team
     role: "",
     department: "",
     target_metrics: {},
+    auth_user_id: null,
   });
   const [metricKey, setMetricKey] = useState("");
   const [metricValue, setMetricValue] = useState("");
+  const [email, setEmail] = useState("");
 
   useEffect(() => {
     if (member) {
       setFormData(member);
+      setEmail("");
     } else {
       setFormData({
         name: "",
         role: "",
         department: "",
         target_metrics: {},
+        auth_user_id: null,
       });
+      setEmail("");
     }
   }, [member, open]);
 
@@ -95,13 +101,31 @@ export const TeamMemberDialog = ({ open, onOpenChange, member, onSuccess }: Team
           description: "Team member updated successfully",
         });
       } else {
-        // Create new member
+        // Create new member - validate email is provided
+        if (!email) {
+          throw new Error("Email is required for new team members");
+        }
+
+        // Check if email already exists
+        const { data: existingMember, error: checkError } = await supabase
+          .from("team_members")
+          .select("id")
+          .eq("auth_user_id", email)
+          .maybeSingle();
+
+        if (checkError) throw checkError;
+        
+        if (existingMember) {
+          throw new Error("A team member with this email already exists");
+        }
+
         const { error } = await supabase.from("team_members").insert({
           user_id: user!.id,
           name: formData.name,
           role: formData.role,
           department: formData.department,
           target_metrics: formData.target_metrics,
+          auth_user_id: null, // Will be linked when they sign up
         });
 
         if (error) throw error;
@@ -157,6 +181,23 @@ export const TeamMemberDialog = ({ open, onOpenChange, member, onSuccess }: Team
               />
             </div>
           </div>
+
+          {!member && (
+            <div className="space-y-2">
+              <Label htmlFor="email">Email (Gmail) *</Label>
+              <Input
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="member@gmail.com"
+                required={!member}
+              />
+              <p className="text-xs text-muted-foreground">
+                This email will be used by the team member to sign up and access their account
+              </p>
+            </div>
+          )}
 
           <div className="space-y-2">
             <Label htmlFor="department">Department</Label>
