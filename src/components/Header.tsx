@@ -3,8 +3,15 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useEffect, useState } from "react";
 import logo from "@/assets/logo.png";
-import { LogOut } from "lucide-react";
+import { LogOut, Menu, LayoutDashboard, Users, ClipboardCheck, BarChart3, FileText } from "lucide-react";
 import { NotificationBell } from "./NotificationBell";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export const Header = () => {
   const { user, userRole, signOut } = useAuth();
@@ -22,39 +29,70 @@ export const Header = () => {
           <img src={logo} alt="ResultsBoard" className="h-8 w-8" />
           <h1 className="text-xl font-bold">ResultsBoard</h1>
         </div>
-        <nav className="flex items-center space-x-4">
-          {userRole === 'ceo' && (
-            <>
-              <Button variant="ghost" asChild>
-                <Link to="/dashboard">Dashboard</Link>
-              </Button>
-              <Button variant="ghost" asChild>
-                <Link to="/team">Team</Link>
-              </Button>
-              <Button variant="ghost" asChild>
-                <Link to="/check-ins">Check-ins</Link>
-              </Button>
-              <Button variant="ghost" asChild>
-                <Link to="/analysis">Analysis</Link>
-              </Button>
-              <Button variant="ghost" asChild>
-                <Link to="/reports">Reports</Link>
-              </Button>
-              <NotificationBell />
-            </>
-          )}
-          {userRole === 'team_member' && (
-            <Button variant="ghost" asChild>
-              <Link to="/reports">Reports</Link>
-            </Button>
-          )}
+        <div className="flex items-center gap-3">
+          {userRole === 'ceo' && <NotificationBell />}
           {user && (
-            <Button variant="outline" onClick={handleSignOut}>
-              <LogOut className="h-4 w-4 mr-2" />
-              Sign Out
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="icon">
+                  <Menu className="h-5 w-5" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48">
+                {userRole === 'ceo' && (
+                  <>
+                    <DropdownMenuItem asChild>
+                      <Link to="/dashboard" className="flex items-center cursor-pointer">
+                        <LayoutDashboard className="h-4 w-4 mr-2" />
+                        Dashboard
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link to="/team" className="flex items-center cursor-pointer">
+                        <Users className="h-4 w-4 mr-2" />
+                        Team
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link to="/check-ins" className="flex items-center cursor-pointer">
+                        <ClipboardCheck className="h-4 w-4 mr-2" />
+                        Check-ins
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link to="/analysis" className="flex items-center cursor-pointer">
+                        <BarChart3 className="h-4 w-4 mr-2" />
+                        Analysis
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link to="/reports" className="flex items-center cursor-pointer">
+                        <FileText className="h-4 w-4 mr-2" />
+                        Reports
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                  </>
+                )}
+                {userRole === 'team_member' && (
+                  <>
+                    <DropdownMenuItem asChild>
+                      <Link to="/reports" className="flex items-center cursor-pointer">
+                        <FileText className="h-4 w-4 mr-2" />
+                        Reports
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                  </>
+                )}
+                <DropdownMenuItem onClick={handleSignOut} className="cursor-pointer">
+                  <LogOut className="h-4 w-4 mr-2" />
+                  Sign Out
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           )}
-        </nav>
+        </div>
       </div>
     </header>
   );
