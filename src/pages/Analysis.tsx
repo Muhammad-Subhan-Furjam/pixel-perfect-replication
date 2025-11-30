@@ -1,86 +1,39 @@
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Download, AlertTriangle, Copy, Check } from "lucide-react";
-import { Header } from "@/components/Header";
-import { useAuth } from "@/contexts/AuthContext";
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
-import jsPDF from "jspdf";
-
-interface AnalysisResult {
-  id: string;
-  name: string;
-  role: string;
-  score: string;
-  blocker: string;
-  reason: string;
-  message: string;
-  nextStep: string;
-}
+import { Download, AlertTriangle } from "lucide-react";
+import logo from "@/assets/logo.png";
 
 const Analysis = () => {
-  const [analyses, setAnalyses] = useState<AnalysisResult[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [copiedId, setCopiedId] = useState<string | null>(null);
-  const { user } = useAuth();
-  const navigate = useNavigate();
-  const { toast } = useToast();
-
-  useEffect(() => {
-    if (!user) {
-      navigate('/auth');
-      return;
-    }
-    loadAnalyses();
-  }, [user, navigate]);
-
-  const loadAnalyses = async () => {
-    try {
-      const { data: analysesData, error: analysesError } = await supabase
-        .from('analyses')
-        .select(`
-          id,
-          score,
-          blocker,
-          reason,
-          message,
-          next_step,
-          check_ins (
-            team_members (
-              name,
-              role
-            )
-          )
-        `)
-        .order('created_at', { ascending: false });
-
-      if (analysesError) throw analysesError;
-
-      const formattedAnalyses = analysesData.map((analysis: any) => ({
-        id: analysis.id,
-        name: analysis.check_ins.team_members.name,
-        role: analysis.check_ins.team_members.role,
-        score: analysis.score,
-        blocker: analysis.blocker,
-        reason: analysis.reason,
-        message: analysis.message,
-        nextStep: analysis.next_step,
-      }));
-
-      setAnalyses(formattedAnalyses);
-    } catch (error: any) {
-      toast({
-        title: "Error loading analyses",
-        description: error.message,
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
+  const analysisResults = [
+    {
+      name: "Sarah Johnson",
+      role: "Nursing",
+      score: "green",
+      blocker: "NONE",
+      reason: "Exceeded patient care target by 15%. Excellent bedside manner reported.",
+      message: "Amazing work, Sarah! Keep it up - you're making a real difference.",
+      nextStep: "Consider for Employee of the Month bonus",
+    },
+    {
+      name: "Michael Chen",
+      role: "Pharmacy",
+      score: "yellow",
+      blocker: "EMPLOYEE",
+      reason: "Turnaround time slipping from 30min to 45min average. Needs attention.",
+      message: "Michael, I noticed the dispensing time is up. Can we chat about what's slowing things down? Need to get back to 30min by Friday.",
+      nextStep: "Schedule 1-on-1 to discuss workload and support needs",
+    },
+    {
+      name: "Carlos Rivera",
+      role: "Lab Tech",
+      score: "red",
+      blocker: "SYSTEM",
+      reason: "Equipment failure preventing test completion. Not staff issue - infrastructure problem.",
+      message: "Carlos, thanks for reporting the equipment issue. We're addressing this immediately - not your fault. Expect repair by tomorrow.",
+      nextStep: "Emergency maintenance call - equipment must be fixed today",
+    },
+  ];
 
   const getScoreColor = (score: string) => {
     switch (score) {
@@ -98,113 +51,22 @@ const Analysis = () => {
     return null;
   };
 
-  const copyToClipboard = async (text: string, id: string) => {
-    try {
-      await navigator.clipboard.writeText(text);
-      setCopiedId(id);
-      setTimeout(() => setCopiedId(null), 2000);
-      toast({
-        title: "Copied!",
-        description: "Message copied to clipboard",
-      });
-    } catch (error) {
-      toast({
-        title: "Failed to copy",
-        description: "Please try again",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const exportToPDF = () => {
-    try {
-      const doc = new jsPDF();
-      const pageWidth = doc.internal.pageSize.getWidth();
-      const pageHeight = doc.internal.pageSize.getHeight();
-      const margin = 20;
-      let yPos = margin;
-
-      // Title
-      doc.setFontSize(20);
-      doc.text("Performance Analysis Report", margin, yPos);
-      yPos += 15;
-
-      // Stats
-      doc.setFontSize(12);
-      doc.text(`Total Analyses: ${analyses.length}`, margin, yPos);
-      yPos += 7;
-      doc.text(`Green: ${stats.green} | Yellow: ${stats.yellow} | Red: ${stats.red}`, margin, yPos);
-      yPos += 15;
-
-      // Analyses
-      doc.setFontSize(14);
-      doc.text("Detailed Analyses", margin, yPos);
-      yPos += 10;
-
-      analyses.forEach((result, index) => {
-        if (yPos > pageHeight - 40) {
-          doc.addPage();
-          yPos = margin;
-        }
-
-        doc.setFontSize(10);
-        doc.setFont("helvetica", "bold");
-        doc.text(`${index + 1}. ${result.name} - ${result.role}`, margin, yPos);
-        yPos += 6;
-
-        doc.setFont("helvetica", "normal");
-        doc.text(`Score: ${result.score.toUpperCase()}`, margin + 5, yPos);
-        yPos += 6;
-        doc.text(`Blocker: ${result.blocker}`, margin + 5, yPos);
-        yPos += 6;
-
-        const reasonLines = doc.splitTextToSize(`Reason: ${result.reason}`, pageWidth - 2 * margin - 5);
-        doc.text(reasonLines, margin + 5, yPos);
-        yPos += reasonLines.length * 6;
-
-        const messageLines = doc.splitTextToSize(`Message: ${result.message}`, pageWidth - 2 * margin - 5);
-        doc.text(messageLines, margin + 5, yPos);
-        yPos += messageLines.length * 6;
-
-        const nextStepLines = doc.splitTextToSize(`Next Step: ${result.nextStep}`, pageWidth - 2 * margin - 5);
-        doc.text(nextStepLines, margin + 5, yPos);
-        yPos += nextStepLines.length * 6 + 10;
-      });
-
-      doc.save("performance-analysis-report.pdf");
-      toast({
-        title: "Success",
-        description: "PDF report exported successfully",
-      });
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: "Failed to export PDF",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const stats = {
-    green: analyses.filter(a => a.score === 'green').length,
-    yellow: analyses.filter(a => a.score === 'yellow').length,
-    red: analyses.filter(a => a.score === 'red').length,
-  };
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-background">
-        <Header />
-        <main className="container mx-auto px-4 py-8">
-          <p className="text-center text-muted-foreground">Loading analyses...</p>
-        </main>
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen bg-background">
-      <Header />
+      <header className="border-b border-border bg-card">
+        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+          <div className="flex items-center space-x-3">
+            <img src={logo} alt="ResultsBoard" className="h-8 w-8" />
+            <h1 className="text-xl font-bold">ResultsBoard</h1>
+          </div>
+          <nav className="flex items-center space-x-4">
+            <Button variant="ghost">Dashboard</Button>
+            <Button variant="ghost">Team</Button>
+            <Button variant="ghost">Check-ins</Button>
+            <Button variant="ghost">Analysis</Button>
+          </nav>
+        </div>
+      </header>
 
       <main className="container mx-auto px-4 py-8">
         <div className="flex items-center justify-between mb-8">
@@ -212,7 +74,7 @@ const Analysis = () => {
             <h2 className="text-3xl font-bold mb-2">Today's Analysis</h2>
             <p className="text-muted-foreground">AI-powered performance insights and recommendations</p>
           </div>
-          <Button variant="outline" onClick={exportToPDF}>
+          <Button variant="outline">
             <Download className="h-4 w-4 mr-2" />
             Export PDF
           </Button>
@@ -226,39 +88,31 @@ const Analysis = () => {
           <CardContent className="space-y-4">
             <div className="grid gap-4 md:grid-cols-3">
               <div className="p-4 rounded-lg bg-success/10 border border-success/20">
-                <p className="text-2xl font-bold text-success">{stats.green}</p>
+                <p className="text-2xl font-bold text-success">1</p>
                 <p className="text-sm text-muted-foreground">Top Performers</p>
               </div>
               <div className="p-4 rounded-lg bg-warning/10 border border-warning/20">
-                <p className="text-2xl font-bold text-warning">{stats.yellow}</p>
+                <p className="text-2xl font-bold text-warning">1</p>
                 <p className="text-sm text-muted-foreground">Needs Coaching</p>
               </div>
               <div className="p-4 rounded-lg bg-destructive/10 border border-destructive/20">
-                <p className="text-2xl font-bold text-destructive">{stats.red}</p>
+                <p className="text-2xl font-bold text-destructive">1</p>
                 <p className="text-sm text-muted-foreground">System Issues</p>
               </div>
             </div>
-            {stats.red > 0 && (
-              <div className="p-4 rounded-lg bg-primary/5 border border-primary/20">
-                <p className="font-medium mb-2">Priority Action</p>
-                <p className="text-sm text-muted-foreground">
-                  {stats.red} critical issue{stats.red > 1 ? 's' : ''} requiring immediate attention. Review red-flagged items below.
-                </p>
-              </div>
-            )}
+            <div className="p-4 rounded-lg bg-primary/5 border border-primary/20">
+              <p className="font-medium mb-2">Priority Action</p>
+              <p className="text-sm text-muted-foreground">
+                Critical equipment failure in lab needs immediate attention. Contact maintenance now.
+                This is a SYSTEM blocker - not staff performance issue.
+              </p>
+            </div>
           </CardContent>
         </Card>
 
-        {analyses.length === 0 ? (
-          <Card>
-            <CardContent className="py-12 text-center">
-              <p className="text-muted-foreground">No analyses yet. Run check-ins first!</p>
-            </CardContent>
-          </Card>
-        ) : (
-          <div className="space-y-6">
-            {analyses.map((result) => (
-            <Card key={result.id} className="overflow-hidden">
+        <div className="space-y-6">
+          {analysisResults.map((result, index) => (
+            <Card key={index} className="overflow-hidden">
               <CardHeader className="bg-card">
                 <div className="flex items-start justify-between">
                   <div>
@@ -286,23 +140,8 @@ const Analysis = () => {
                 <div className="p-4 rounded-lg bg-muted">
                   <p className="text-sm font-medium mb-2">Message for Employee</p>
                   <p className="text-sm italic">"{result.message}"</p>
-                  <Button 
-                    size="sm" 
-                    variant="outline" 
-                    className="mt-3"
-                    onClick={() => copyToClipboard(result.message, result.id)}
-                  >
-                    {copiedId === result.id ? (
-                      <>
-                        <Check className="h-3 w-3 mr-1" />
-                        Copied!
-                      </>
-                    ) : (
-                      <>
-                        <Copy className="h-3 w-3 mr-1" />
-                        Copy to Clipboard
-                      </>
-                    )}
+                  <Button size="sm" variant="outline" className="mt-3">
+                    Copy to Clipboard
                   </Button>
                 </div>
                 <div className="p-4 rounded-lg bg-primary/5 border border-primary/20">
@@ -311,9 +150,8 @@ const Analysis = () => {
                 </div>
               </CardContent>
             </Card>
-            ))}
-          </div>
-        )}
+          ))}
+        </div>
       </main>
     </div>
   );

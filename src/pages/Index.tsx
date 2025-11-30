@@ -30,7 +30,7 @@ const Index = () => {
             <img src={logo} alt="ResultsBoard" className="h-10 w-10" />
             <span className="text-2xl font-bold">ResultsBoard</span>
           </div>
-          <Link to="/auth">
+          <Link to="/login">
             <Button variant="outline">Sign In</Button>
           </Link>
         </div>
@@ -52,7 +52,7 @@ const Index = () => {
                 <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
               </Button>
             </Link>
-            <Link to="/auth">
+            <Link to="/login">
               <Button size="lg" variant="outline">
                 Get Started
               </Button>
