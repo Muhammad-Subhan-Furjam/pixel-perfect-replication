@@ -14,7 +14,145 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      analyses: {
+        Row: {
+          blocker: string
+          check_in_id: string
+          created_at: string | null
+          id: string
+          language: string | null
+          message: string
+          next_step: string
+          reason: string
+          score: string
+          user_id: string
+        }
+        Insert: {
+          blocker?: string
+          check_in_id: string
+          created_at?: string | null
+          id?: string
+          language?: string | null
+          message: string
+          next_step: string
+          reason: string
+          score: string
+          user_id: string
+        }
+        Update: {
+          blocker?: string
+          check_in_id?: string
+          created_at?: string | null
+          id?: string
+          language?: string | null
+          message?: string
+          next_step?: string
+          reason?: string
+          score?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "analyses_check_in_id_fkey"
+            columns: ["check_in_id"]
+            isOneToOne: false
+            referencedRelation: "check_ins"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      check_ins: {
+        Row: {
+          created_at: string | null
+          date: string
+          id: string
+          metrics: Json
+          notes: string | null
+          team_member_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          date?: string
+          id?: string
+          metrics: Json
+          notes?: string | null
+          team_member_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          date?: string
+          id?: string
+          metrics?: Json
+          notes?: string | null
+          team_member_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "check_ins_team_member_id_fkey"
+            columns: ["team_member_id"]
+            isOneToOne: false
+            referencedRelation: "team_members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string | null
+          email: string | null
+          full_name: string | null
+          id: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string | null
+          email?: string | null
+          full_name?: string | null
+          id: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string | null
+          email?: string | null
+          full_name?: string | null
+          id?: string
+        }
+        Relationships: []
+      }
+      team_members: {
+        Row: {
+          created_at: string | null
+          department: string | null
+          id: string
+          name: string
+          role: string
+          target_metrics: Json | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          department?: string | null
+          id?: string
+          name: string
+          role: string
+          target_metrics?: Json | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          department?: string | null
+          id?: string
+          name?: string
+          role?: string
+          target_metrics?: Json | null
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
