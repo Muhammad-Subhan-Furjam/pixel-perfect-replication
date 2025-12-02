@@ -11,6 +11,7 @@ import Team from "./pages/Team";
 import CheckIns from "./pages/CheckIns";
 import Analysis from "./pages/Analysis";
 import Subscription from "./pages/Subscription";
+import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -30,6 +31,7 @@ const App = () => (
             <Route path="/check-ins" element={<CheckIns />} />
             <Route path="/analysis" element={<Analysis />} />
             <Route path="/subscription" element={<Subscription />} />
+            <Route path="/settings" element={<Settings />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

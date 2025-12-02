@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import logo from "@/assets/logo.png";
-import { LogOut, Crown } from "lucide-react";
+import { LogOut, Crown, Settings } from "lucide-react";
 import { NotificationBell } from "@/components/NotificationBell";
 
 export const Header = () => {
@@ -43,6 +43,11 @@ export const Header = () => {
           {user && (
             <>
               <NotificationBell />
+              <Button variant="ghost" asChild>
+                <Link to="/settings">
+                  <Settings className="h-4 w-4" />
+                </Link>
+              </Button>
               <Button variant="outline" onClick={handleSignOut}>
                 <LogOut className="h-4 w-4 mr-2" />
                 Sign Out
