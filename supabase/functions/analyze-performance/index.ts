@@ -65,33 +65,52 @@ Respond in ${language} language. Provide JSON: {"score": "green|yellow|red", "bl
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-5-mini-2025-08-07',
+        model: 'gpt-4o-mini',
         messages: [
           { role: 'system', content: systemPrompt },
           { role: 'user', content: userPrompt }
         ],
-        max_completion_tokens: 500,
+        response_format: { type: "json_object" },
+        temperature: 0.7,
+        max_tokens: 500,
       }),
     });
 
     if (!response.ok) {
       const errorText = await response.text();
       console.error('OpenAI API error:', response.status, errorText);
-      throw new Error(`OpenAI API error: ${response.status}`);
+      throw new Error(`OpenAI API error: ${response.status} - ${errorText}`);
     }
 
     const data = await response.json();
+    console.log('OpenAI full response:', JSON.stringify(data));
+    
+    if (!data.choices || !data.choices[0] || !data.choices[0].message) {
+      console.error('Unexpected API response structure:', data);
+      throw new Error('Invalid response structure from OpenAI API');
+    }
+
     const analysisText = data.choices[0].message.content;
+    console.log('AI Response content:', analysisText);
     
-    console.log('AI Response:', analysisText);
-    
-    // Parse JSON from response
-    const jsonMatch = analysisText.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) {
-      throw new Error('Failed to parse AI response');
+    if (!analysisText || analysisText.trim() === '') {
+      throw new Error('Empty response from OpenAI API');
     }
     
-    const analysis = JSON.parse(jsonMatch[0]);
+    // Parse JSON from response
+    let analysis;
+    try {
+      analysis = JSON.parse(analysisText);
+    } catch (parseError) {
+      console.error('Failed to parse JSON:', analysisText);
+      throw new Error(`Failed to parse AI response as JSON: ${parseError instanceof Error ? parseError.message : 'Unknown error'}`);
+    }
+    
+    // Validate required fields
+    if (!analysis.score || !analysis.blocker || !analysis.message || !analysis.nextStep) {
+      console.error('Missing required fields in analysis:', analysis);
+      throw new Error('AI response missing required fields');
+    }
 
     // Save to database
     const { data: savedAnalysis, error: dbError } = await supabase
