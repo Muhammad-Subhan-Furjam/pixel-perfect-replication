@@ -1,13 +1,15 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import logo from "@/assets/logo.png";
+import { LogOut } from "lucide-react";
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -16,8 +18,11 @@ const Auth = () => {
   const [fullName, setFullName] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
   const { user } = useAuth();
   const { toast } = useToast();
+
+  const showSignedOutMessage = location.state?.signedOut === true;
 
   useEffect(() => {
     if (user) {
@@ -82,6 +87,14 @@ const Auth = () => {
           <div className="flex justify-center mb-4">
             <img src={logo} alt="ResultsBoard" className="h-12 w-12" />
           </div>
+          {showSignedOutMessage && (
+            <Alert className="mb-4 bg-muted">
+              <LogOut className="h-4 w-4" />
+              <AlertDescription>
+                You've been signed out successfully. See you next time!
+              </AlertDescription>
+            </Alert>
+          )}
           <CardTitle>{isLogin ? "Sign In" : "Create Account"}</CardTitle>
           <CardDescription>
             {isLogin
