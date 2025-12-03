@@ -145,10 +145,10 @@ const CheckIns = () => {
     <div className="min-h-screen bg-background">
       <Header />
 
-      <main className="container mx-auto px-4 py-8">
-        <div className="mb-8">
-          <h2 className="text-3xl font-bold mb-2">Daily Check-ins</h2>
-          <p className="text-muted-foreground">Submit daily performance metrics for team members</p>
+      <main className="container mx-auto px-4 py-6 sm:py-8">
+        <div className="mb-6 sm:mb-8">
+          <h2 className="text-2xl sm:text-3xl font-bold mb-1 sm:mb-2">Daily Check-ins</h2>
+          <p className="text-sm sm:text-base text-muted-foreground">Submit daily performance metrics for team members</p>
         </div>
 
         {loading ? (

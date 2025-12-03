@@ -158,10 +158,10 @@ const Settings = () => {
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      <main className="container mx-auto px-4 py-8">
-        <div className="flex items-center gap-3 mb-8">
-          <SettingsIcon className="h-8 w-8 text-primary" />
-          <h1 className="text-3xl font-bold text-foreground">Settings</h1>
+      <main className="container mx-auto px-4 py-6 sm:py-8">
+        <div className="flex items-center gap-2 sm:gap-3 mb-6 sm:mb-8">
+          <SettingsIcon className="h-6 w-6 sm:h-8 sm:w-8 text-primary" />
+          <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Settings</h1>
         </div>
 
         <Tabs defaultValue="profile" className="space-y-6">
@@ -240,7 +240,7 @@ const Settings = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div className="space-y-0.5">
                     <Label htmlFor="emailCheckIns">Check-in Notifications</Label>
                     <p className="text-sm text-muted-foreground">
@@ -256,7 +256,7 @@ const Settings = () => {
                   />
                 </div>
 
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div className="space-y-0.5">
                     <Label htmlFor="emailAnalyses">Analysis Notifications</Label>
                     <p className="text-sm text-muted-foreground">

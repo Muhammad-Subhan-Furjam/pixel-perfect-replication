@@ -122,10 +122,10 @@ const Dashboard = () => {
     <div className="min-h-screen bg-background">
       <Header />
 
-      <main className="container mx-auto px-4 py-8">
-        <div className="mb-8">
-          <h2 className="text-3xl font-bold mb-2">Good morning, CEO</h2>
-          <p className="text-muted-foreground">Here's what's happening with your team today</p>
+      <main className="container mx-auto px-4 py-6 sm:py-8">
+        <div className="mb-6 sm:mb-8">
+          <h2 className="text-2xl sm:text-3xl font-bold mb-2">Good morning, CEO</h2>
+          <p className="text-sm sm:text-base text-muted-foreground">Here's what's happening with your team today</p>
         </div>
 
         {loading ? (

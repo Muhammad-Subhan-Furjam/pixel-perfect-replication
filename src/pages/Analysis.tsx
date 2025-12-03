@@ -195,7 +195,7 @@ const Analysis = () => {
     return (
       <div className="min-h-screen bg-background">
         <Header />
-        <main className="container mx-auto px-4 py-8">
+        <main className="container mx-auto px-4 py-6 sm:py-8">
           <p className="text-center text-muted-foreground">Loading analyses...</p>
         </main>
       </div>
@@ -206,36 +206,36 @@ const Analysis = () => {
     <div className="min-h-screen bg-background">
       <Header />
 
-      <main className="container mx-auto px-4 py-8">
-        <div className="flex items-center justify-between mb-8">
+      <main className="container mx-auto px-4 py-6 sm:py-8">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 sm:mb-8">
           <div>
-            <h2 className="text-3xl font-bold mb-2">Today's Analysis</h2>
-            <p className="text-muted-foreground">AI-powered performance insights and recommendations</p>
+            <h2 className="text-2xl sm:text-3xl font-bold mb-1 sm:mb-2">Today's Analysis</h2>
+            <p className="text-sm sm:text-base text-muted-foreground">AI-powered performance insights and recommendations</p>
           </div>
-          <Button variant="outline" onClick={exportToPDF}>
+          <Button variant="outline" onClick={exportToPDF} className="w-full sm:w-auto">
             <Download className="h-4 w-4 mr-2" />
             Export PDF
           </Button>
         </div>
 
-        <Card className="mb-8 bg-card/50 backdrop-blur">
+        <Card className="mb-6 sm:mb-8 bg-card/50 backdrop-blur">
           <CardHeader>
-            <CardTitle>CEO Executive Brief</CardTitle>
+            <CardTitle className="text-lg sm:text-xl">CEO Executive Brief</CardTitle>
             <CardDescription>Daily summary and action items</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="grid gap-4 md:grid-cols-3">
-              <div className="p-4 rounded-lg bg-success/10 border border-success/20">
-                <p className="text-2xl font-bold text-success">{stats.green}</p>
-                <p className="text-sm text-muted-foreground">Top Performers</p>
+            <div className="grid gap-3 sm:gap-4 grid-cols-3">
+              <div className="p-3 sm:p-4 rounded-lg bg-success/10 border border-success/20">
+                <p className="text-xl sm:text-2xl font-bold text-success">{stats.green}</p>
+                <p className="text-xs sm:text-sm text-muted-foreground">Top Performers</p>
               </div>
-              <div className="p-4 rounded-lg bg-warning/10 border border-warning/20">
-                <p className="text-2xl font-bold text-warning">{stats.yellow}</p>
-                <p className="text-sm text-muted-foreground">Needs Coaching</p>
+              <div className="p-3 sm:p-4 rounded-lg bg-warning/10 border border-warning/20">
+                <p className="text-xl sm:text-2xl font-bold text-warning">{stats.yellow}</p>
+                <p className="text-xs sm:text-sm text-muted-foreground">Needs Coaching</p>
               </div>
-              <div className="p-4 rounded-lg bg-destructive/10 border border-destructive/20">
-                <p className="text-2xl font-bold text-destructive">{stats.red}</p>
-                <p className="text-sm text-muted-foreground">System Issues</p>
+              <div className="p-3 sm:p-4 rounded-lg bg-destructive/10 border border-destructive/20">
+                <p className="text-xl sm:text-2xl font-bold text-destructive">{stats.red}</p>
+                <p className="text-xs sm:text-sm text-muted-foreground">System Issues</p>
               </div>
             </div>
             {stats.red > 0 && (
@@ -260,10 +260,10 @@ const Analysis = () => {
             {analyses.map((result) => (
             <Card key={result.id} className="overflow-hidden">
               <CardHeader className="bg-card">
-                <div className="flex items-start justify-between">
+                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
                   <div>
-                    <div className="flex items-center gap-2 mb-1">
-                      <CardTitle>{result.name}</CardTitle>
+                    <div className="flex flex-wrap items-center gap-2 mb-1">
+                      <CardTitle className="text-base sm:text-lg">{result.name}</CardTitle>
                       <Badge variant={getScoreColor(result.score)}>
                         {result.score.toUpperCase()}
                       </Badge>
