@@ -23,7 +23,7 @@ export const Header = () => {
 
   const handleSignOut = async () => {
     await signOut();
-    navigate('/login');
+    navigate('/dashboard');
   };
 
   const isActive = (path: string) => location.pathname === path;
