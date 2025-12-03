@@ -106,13 +106,13 @@ const Team = () => {
     <div className="min-h-screen bg-background">
       <Header />
 
-      <main className="container mx-auto px-4 py-8">
-        <div className="flex items-center justify-between mb-8">
+      <main className="container mx-auto px-4 py-6 sm:py-8">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 sm:mb-8">
           <div>
-            <h2 className="text-3xl font-bold mb-2">Team Management</h2>
-            <p className="text-muted-foreground">Manage team members, roles, and KPI targets</p>
+            <h2 className="text-2xl sm:text-3xl font-bold mb-1 sm:mb-2">Team Management</h2>
+            <p className="text-sm sm:text-base text-muted-foreground">Manage team members, roles, and KPI targets</p>
           </div>
-          <Button onClick={handleAdd}>
+          <Button onClick={handleAdd} className="w-full sm:w-auto">
             <Plus className="h-4 w-4 mr-2" />
             Add Member
           </Button>
@@ -146,7 +146,7 @@ const Team = () => {
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid gap-4 md:grid-cols-3">
+                  <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
                     <div>
                       <p className="text-sm font-medium text-muted-foreground mb-1">Department</p>
                       <p className="font-medium">{member.department || "N/A"}</p>
@@ -161,14 +161,14 @@ const Team = () => {
                         ))}
                       </div>
                     </div>
-                    <div className="flex items-end justify-end space-x-2">
+                    <div className="flex items-end sm:justify-end space-x-2 pt-2 sm:pt-0">
                       <Button variant="outline" size="sm" onClick={() => handleEdit(member)}>
-                        <Pencil className="h-4 w-4 mr-1" />
-                        Edit
+                        <Pencil className="h-4 w-4 sm:mr-1" />
+                        <span className="hidden sm:inline">Edit</span>
                       </Button>
                       <Button variant="outline" size="sm" onClick={() => handleDeleteClick(member.id)}>
-                        <Trash2 className="h-4 w-4 mr-1" />
-                        Delete
+                        <Trash2 className="h-4 w-4 sm:mr-1" />
+                        <span className="hidden sm:inline">Delete</span>
                       </Button>
                     </div>
                   </div>

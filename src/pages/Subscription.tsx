@@ -102,11 +102,11 @@ export default function Subscription() {
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      <main className="container mx-auto px-4 py-8">
+      <main className="container mx-auto px-4 py-6 sm:py-8">
         <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold mb-2">Subscription Plans</h1>
-            <p className="text-muted-foreground">
+          <div className="text-center mb-6 sm:mb-8">
+            <h1 className="text-2xl sm:text-3xl font-bold mb-2">Subscription Plans</h1>
+            <p className="text-sm sm:text-base text-muted-foreground">
               Choose the plan that best fits your team's needs
             </p>
           </div>
@@ -118,19 +118,19 @@ export default function Subscription() {
           ) : (
             <>
               {subscribed && subscriptionEnd && (
-                <Card className="mb-8 border-primary">
+                <Card className="mb-6 sm:mb-8 border-primary">
                   <CardContent className="pt-6">
-                    <div className="flex items-center justify-between">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                       <div className="flex items-center gap-3">
-                        <Crown className="h-6 w-6 text-primary" />
+                        <Crown className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
                         <div>
-                          <p className="font-semibold">Current Plan: {planName}</p>
-                          <p className="text-sm text-muted-foreground">
+                          <p className="font-semibold text-sm sm:text-base">Current Plan: {planName}</p>
+                          <p className="text-xs sm:text-sm text-muted-foreground">
                             Renews on {format(new Date(subscriptionEnd), "MMMM d, yyyy")}
                           </p>
                         </div>
                       </div>
-                      <Button variant="outline" onClick={handleManageSubscription}>
+                      <Button variant="outline" onClick={handleManageSubscription} className="w-full sm:w-auto">
                         Manage Billing
                         <ExternalLink className="ml-2 h-4 w-4" />
                       </Button>
