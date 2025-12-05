@@ -9,7 +9,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import logo from "@/assets/logo.png";
-import { LogOut } from "lucide-react";
+import { LogOut, Chrome } from "lucide-react";
+import { Separator } from "@/components/ui/separator";
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -23,6 +24,24 @@ const Auth = () => {
   const { toast } = useToast();
 
   const showSignedOutMessage = location.state?.signedOut === true;
+
+  const handleGoogleSignIn = async () => {
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/dashboard`,
+        },
+      });
+      if (error) throw error;
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
 
   useEffect(() => {
     if (user) {
@@ -143,6 +162,24 @@ const Auth = () => {
             <Button type="submit" className="w-full" disabled={loading}>
               {loading ? "Loading..." : isLogin ? "Sign In" : "Sign Up"}
             </Button>
+            
+            <div className="relative my-4">
+              <Separator />
+              <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-card px-2 text-xs text-muted-foreground">
+                or continue with
+              </span>
+            </div>
+            
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full"
+              onClick={handleGoogleSignIn}
+            >
+              <Chrome className="mr-2 h-4 w-4" />
+              Google
+            </Button>
+            
             <Button
               type="button"
               variant="ghost"
