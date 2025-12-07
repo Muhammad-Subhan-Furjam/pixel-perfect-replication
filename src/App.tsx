@@ -11,6 +11,9 @@ import Dashboard from "./pages/Dashboard";
 import Team from "./pages/Team";
 import CheckIns from "./pages/CheckIns";
 import Analysis from "./pages/Analysis";
+import Analytics from "./pages/Analytics";
+import Metrics from "./pages/Metrics";
+import Permissions from "./pages/Permissions";
 import Subscription from "./pages/Subscription";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
@@ -31,6 +34,9 @@ const App = () => (
             <Route path="/team" element={<ProtectedRoute><Team /></ProtectedRoute>} />
             <Route path="/check-ins" element={<ProtectedRoute><CheckIns /></ProtectedRoute>} />
             <Route path="/analysis" element={<ProtectedRoute><Analysis /></ProtectedRoute>} />
+            <Route path="/analytics" element={<ProtectedRoute><Analytics /></ProtectedRoute>} />
+            <Route path="/metrics" element={<ProtectedRoute><Metrics /></ProtectedRoute>} />
+            <Route path="/permissions" element={<ProtectedRoute><Permissions /></ProtectedRoute>} />
             <Route path="/subscription" element={<ProtectedRoute><Subscription /></ProtectedRoute>} />
             <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
