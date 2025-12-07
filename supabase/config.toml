@@ -14,3 +14,6 @@ verify_jwt = true
 
 [functions.send-notification-email]
 verify_jwt = true
+
+[functions.send-metric-reminders]
+verify_jwt = false

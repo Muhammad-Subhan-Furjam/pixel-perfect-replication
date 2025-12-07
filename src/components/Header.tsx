@@ -13,6 +13,9 @@ const navItems = [
   { label: "Team", path: "/team" },
   { label: "Check-ins", path: "/check-ins" },
   { label: "Analysis", path: "/analysis" },
+  { label: "Analytics", path: "/analytics" },
+  { label: "Metrics", path: "/metrics" },
+  { label: "Permissions", path: "/permissions" },
 ];
 
 export const Header = () => {

@@ -99,6 +99,47 @@ export type Database = {
           },
         ]
       }
+      daily_metrics: {
+        Row: {
+          created_at: string
+          date: string
+          id: string
+          metrics: Json
+          notes: string | null
+          submitted_at: string
+          team_member_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          date?: string
+          id?: string
+          metrics?: Json
+          notes?: string | null
+          submitted_at?: string
+          team_member_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          date?: string
+          id?: string
+          metrics?: Json
+          notes?: string | null
+          submitted_at?: string
+          team_member_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "daily_metrics_team_member_id_fkey"
+            columns: ["team_member_id"]
+            isOneToOne: false
+            referencedRelation: "team_members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notification_preferences: {
         Row: {
           created_at: string
@@ -149,6 +190,35 @@ export type Database = {
           id?: string
         }
         Relationships: []
+      }
+      reminder_logs: {
+        Row: {
+          id: string
+          reminder_date: string
+          sent_at: string
+          team_member_id: string
+        }
+        Insert: {
+          id?: string
+          reminder_date?: string
+          sent_at?: string
+          team_member_id: string
+        }
+        Update: {
+          id?: string
+          reminder_date?: string
+          sent_at?: string
+          team_member_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reminder_logs_team_member_id_fkey"
+            columns: ["team_member_id"]
+            isOneToOne: false
+            referencedRelation: "team_members"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       team_member_reports: {
         Row: {
@@ -203,6 +273,7 @@ export type Database = {
           auth_user_id: string | null
           created_at: string | null
           department: string | null
+          department_type: string | null
           id: string
           name: string
           role: string
@@ -213,6 +284,7 @@ export type Database = {
           auth_user_id?: string | null
           created_at?: string | null
           department?: string | null
+          department_type?: string | null
           id?: string
           name: string
           role: string
@@ -223,10 +295,38 @@ export type Database = {
           auth_user_id?: string | null
           created_at?: string | null
           department?: string | null
+          department_type?: string | null
           id?: string
           name?: string
           role?: string
           target_metrics?: Json | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_permissions: {
+        Row: {
+          can_manage_team: boolean
+          created_at: string
+          granted_by: string
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          can_manage_team?: boolean
+          created_at?: string
+          granted_by: string
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          can_manage_team?: boolean
+          created_at?: string
+          granted_by?: string
+          id?: string
+          updated_at?: string
           user_id?: string
         }
         Relationships: []
@@ -257,6 +357,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      can_manage_team: { Args: { _user_id: string }; Returns: boolean }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -266,7 +367,7 @@ export type Database = {
       }
     }
     Enums: {
-      app_role: "ceo" | "team_member"
+      app_role: "ceo" | "team_member" | "executive_assistant" | "hr"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -394,7 +495,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["ceo", "team_member"],
+      app_role: ["ceo", "team_member", "executive_assistant", "hr"],
     },
   },
 } as const
