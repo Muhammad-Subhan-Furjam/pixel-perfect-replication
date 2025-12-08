@@ -16,6 +16,7 @@ const navItems = [
   { label: "Analytics", path: "/analytics" },
   { label: "Metrics", path: "/metrics" },
   { label: "Permissions", path: "/permissions" },
+  { label: "Subscribers", path: "/subscribers" },
 ];
 
 export const Header = () => {
