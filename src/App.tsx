@@ -15,6 +15,7 @@ import Analytics from "./pages/Analytics";
 import Metrics from "./pages/Metrics";
 import Permissions from "./pages/Permissions";
 import Subscription from "./pages/Subscription";
+import Subscribers from "./pages/Subscribers";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 
@@ -38,6 +39,7 @@ const App = () => (
             <Route path="/metrics" element={<ProtectedRoute><Metrics /></ProtectedRoute>} />
             <Route path="/permissions" element={<ProtectedRoute><Permissions /></ProtectedRoute>} />
             <Route path="/subscription" element={<ProtectedRoute><Subscription /></ProtectedRoute>} />
+            <Route path="/subscribers" element={<ProtectedRoute><Subscribers /></ProtectedRoute>} />
             <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
