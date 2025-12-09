@@ -18,6 +18,8 @@ import Subscription from "./pages/Subscription";
 import Subscribers from "./pages/Subscribers";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
+import TermsOfService from "./pages/TermsOfService";
 
 const queryClient = new QueryClient();
 
@@ -31,6 +33,8 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
+            <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+            <Route path="/terms-of-service" element={<TermsOfService />} />
             <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
             <Route path="/team" element={<ProtectedRoute><Team /></ProtectedRoute>} />
             <Route path="/check-ins" element={<ProtectedRoute><CheckIns /></ProtectedRoute>} />

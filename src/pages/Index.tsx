@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight, BarChart3, Users, Zap } from "lucide-react";
 import { Link } from "react-router-dom";
 import logo from "@/assets/logo.png";
+import Footer from "@/components/Footer";
 
 const Index = () => {
   const features = [
@@ -23,7 +24,7 @@ const Index = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-card">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-card flex flex-col">
       <header className="container mx-auto px-4 py-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
@@ -36,7 +37,7 @@ const Index = () => {
         </div>
       </header>
 
-      <main className="container mx-auto px-4">
+      <main className="container mx-auto px-4 flex-1">
         <section className="py-20 text-center">
           <h1 className="text-5xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
             Your AI Chief Operating Officer
@@ -75,6 +76,8 @@ const Index = () => {
           </div>
         </section>
       </main>
+
+      <Footer />
     </div>
   );
 };
