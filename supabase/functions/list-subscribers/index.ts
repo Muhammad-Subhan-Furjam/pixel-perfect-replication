@@ -58,22 +58,30 @@ serve(async (req) => {
     const subscriptions = await stripe.subscriptions.list({
       status: "active",
       limit: 100,
-      expand: ["data.customer", "data.items.data.price.product"],
+      expand: ["data.customer"],
     });
 
     logStep("Fetched subscriptions", { count: subscriptions.data.length });
 
-    const subscribers = subscriptions.data.map((sub: Stripe.Subscription) => {
+    const subscribers = await Promise.all(subscriptions.data.map(async (sub: Stripe.Subscription) => {
       const customer = sub.customer as Stripe.Customer;
       const priceItem = sub.items.data[0];
-      const product = priceItem?.price?.product as Stripe.Product;
+      
+      let planName = "Unknown Plan";
+      if (priceItem?.price?.product) {
+        const productId = typeof priceItem.price.product === 'string' 
+          ? priceItem.price.product 
+          : priceItem.price.product.id;
+        const product = await stripe.products.retrieve(productId);
+        planName = product.name;
+      }
       
       return {
         id: sub.id,
         customer_id: customer.id,
         customer_email: customer.email,
         customer_name: customer.name,
-        plan_name: product?.name || "Unknown Plan",
+        plan_name: planName,
         status: sub.status,
         current_period_start: new Date(sub.current_period_start * 1000).toISOString(),
         current_period_end: new Date(sub.current_period_end * 1000).toISOString(),
@@ -82,7 +90,7 @@ serve(async (req) => {
         currency: priceItem?.price?.currency || "usd",
         interval: priceItem?.price?.recurring?.interval || "month",
       };
-    });
+    }));
 
     logStep("Processed subscribers", { count: subscribers.length });
 
