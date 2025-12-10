@@ -9,6 +9,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import jsPDF from "jspdf";
+import Footer from "@/components/Footer";
 
 interface AnalysisResult {
   id: string;
@@ -315,6 +316,7 @@ const Analysis = () => {
           </div>
         )}
       </main>
+      <Footer />
     </div>
   );
 };

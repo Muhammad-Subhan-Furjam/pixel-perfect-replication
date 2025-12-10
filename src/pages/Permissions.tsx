@@ -9,6 +9,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Shield, UserCog, Users } from "lucide-react";
+import Footer from "@/components/Footer";
 
 interface UserWithRole {
   id: string;
@@ -233,6 +234,7 @@ const Permissions = () => {
           </div>
         )}
       </main>
+      <Footer />
     </div>
   );
 };

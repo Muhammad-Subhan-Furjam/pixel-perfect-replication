@@ -10,6 +10,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
+import Footer from "@/components/Footer";
 
 interface TeamMember {
   id: string;
@@ -226,6 +227,7 @@ const CheckIns = () => {
           </Card>
         )}
       </main>
+      <Footer />
     </div>
   );
 };

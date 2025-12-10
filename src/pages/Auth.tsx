@@ -11,6 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import logo from "@/assets/logo.png";
 import { LogOut, Chrome } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
+import Footer from "@/components/Footer";
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -100,8 +101,9 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4">
-      <Card className="w-full max-w-md">
+    <div className="min-h-screen bg-background flex flex-col">
+      <div className="flex-1 flex items-center justify-center p-4">
+        <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <div className="flex justify-center mb-4">
             <img src={logo} alt="ResultsBoard" className="h-12 w-12" />
@@ -193,6 +195,8 @@ const Auth = () => {
           </form>
         </CardContent>
       </Card>
+      </div>
+      <Footer />
     </div>
   );
 };

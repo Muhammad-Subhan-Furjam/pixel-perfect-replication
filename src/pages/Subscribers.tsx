@@ -11,6 +11,7 @@ import { RefreshCw, Users, DollarSign, Calendar, TrendingUp } from "lucide-react
 import { format, subMonths, startOfMonth, endOfMonth, isWithinInterval, parseISO } from "date-fns";
 import { Header } from "@/components/Header";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
+import Footer from "@/components/Footer";
 
 interface Subscriber {
   id: string;
@@ -394,6 +395,7 @@ const Subscribers = () => {
           </CardContent>
         </Card>
       </main>
+      <Footer />
     </div>
   );
 };
