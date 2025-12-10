@@ -10,6 +10,7 @@ import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import { Settings as SettingsIcon, User, Bell, Save, Loader2 } from 'lucide-react';
+import Footer from "@/components/Footer";
 
 interface Profile {
   full_name: string | null;
@@ -146,11 +147,12 @@ const Settings = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen bg-background flex flex-col">
         <Header />
-        <main className="container mx-auto px-4 py-8 flex items-center justify-center">
+        <main className="flex-1 container mx-auto px-4 py-8 flex items-center justify-center">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </main>
+        <Footer />
       </div>
     );
   }
@@ -285,6 +287,7 @@ const Settings = () => {
           </TabsContent>
         </Tabs>
       </main>
+      <Footer />
     </div>
   );
 };

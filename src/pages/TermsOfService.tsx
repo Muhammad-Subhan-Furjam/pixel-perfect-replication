@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import logo from "@/assets/logo.png";
+import Footer from "@/components/Footer";
 
 const TermsOfService = () => {
   return (
@@ -128,6 +129,7 @@ const TermsOfService = () => {
           </div>
         </div>
       </main>
+      <Footer />
     </div>
   );
 };

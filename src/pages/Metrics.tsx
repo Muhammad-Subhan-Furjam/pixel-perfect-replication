@@ -10,6 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, CheckCircle, AlertCircle } from "lucide-react";
 import { format } from "date-fns";
+import Footer from "@/components/Footer";
 
 interface TeamMember {
   id: string;
@@ -186,20 +187,21 @@ const Metrics = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen bg-background flex flex-col">
         <Header />
-        <div className="flex justify-center items-center py-12">
+        <div className="flex-1 flex justify-center items-center py-12">
           <Loader2 className="h-8 w-8 animate-spin" />
         </div>
+        <Footer />
       </div>
     );
   }
 
   if (!teamMember) {
     return (
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen bg-background flex flex-col">
         <Header />
-        <main className="container mx-auto px-4 py-6 sm:py-8">
+        <main className="flex-1 container mx-auto px-4 py-6 sm:py-8">
           <Card>
             <CardContent className="flex flex-col items-center justify-center py-12">
               <AlertCircle className="h-12 w-12 text-muted-foreground mb-4" />
@@ -211,6 +213,7 @@ const Metrics = () => {
             </CardContent>
           </Card>
         </main>
+        <Footer />
       </div>
     );
   }
@@ -291,6 +294,7 @@ const Metrics = () => {
           </CardContent>
         </Card>
       </main>
+      <Footer />
     </div>
   );
 };

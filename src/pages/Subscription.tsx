@@ -9,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Check, Crown, Loader2, ExternalLink } from "lucide-react";
 import { format } from "date-fns";
+import Footer from "@/components/Footer";
 
 const PLANS = {
   free: {
@@ -234,6 +235,7 @@ export default function Subscription() {
           )}
         </div>
       </main>
+      <Footer />
     </div>
   );
 }

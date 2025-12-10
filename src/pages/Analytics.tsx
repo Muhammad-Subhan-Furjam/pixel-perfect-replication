@@ -9,6 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Loader2, TrendingUp, Users, Target, BarChart3 } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
 import { format, subDays, subMonths, startOfWeek, startOfMonth, eachDayOfInterval, eachWeekOfInterval, eachMonthOfInterval } from "date-fns";
+import Footer from "@/components/Footer";
 
 interface AnalysisData {
   id: string;
@@ -406,6 +407,7 @@ const Analytics = () => {
           </>
         )}
       </main>
+      <Footer />
     </div>
   );
 };
