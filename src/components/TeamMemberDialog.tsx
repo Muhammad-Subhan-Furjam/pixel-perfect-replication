@@ -11,6 +11,7 @@ import { Loader2, Plus, Trash2 } from "lucide-react";
 interface TeamMember {
   id?: string;
   name: string;
+  email: string;
   role: string;
   department: string;
   target_metrics: Record<string, string | number>;
@@ -29,6 +30,7 @@ export const TeamMemberDialog = ({ open, onOpenChange, member, onSuccess }: Team
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState<TeamMember>({
     name: "",
+    email: "",
     role: "",
     department: "",
     target_metrics: {},
@@ -42,6 +44,7 @@ export const TeamMemberDialog = ({ open, onOpenChange, member, onSuccess }: Team
     } else {
       setFormData({
         name: "",
+        email: "",
         role: "",
         department: "",
         target_metrics: {},
@@ -82,6 +85,7 @@ export const TeamMemberDialog = ({ open, onOpenChange, member, onSuccess }: Team
           .from("team_members")
           .update({
             name: formData.name,
+            email: formData.email,
             role: formData.role,
             department: formData.department,
             target_metrics: formData.target_metrics,
@@ -99,12 +103,29 @@ export const TeamMemberDialog = ({ open, onOpenChange, member, onSuccess }: Team
         const { error } = await supabase.from("team_members").insert({
           user_id: user!.id,
           name: formData.name,
+          email: formData.email,
           role: formData.role,
           department: formData.department,
           target_metrics: formData.target_metrics,
         });
 
         if (error) throw error;
+
+        // Send welcome email if email is provided
+        if (formData.email) {
+          try {
+            await supabase.functions.invoke("send-team-member-welcome", {
+              body: {
+                email: formData.email,
+                name: formData.name,
+                role: formData.role,
+                department: formData.department,
+              },
+            });
+          } catch (emailError) {
+            console.error("Failed to send welcome email:", emailError);
+          }
+        }
 
         toast({
           title: "Success",
@@ -148,6 +169,19 @@ export const TeamMemberDialog = ({ open, onOpenChange, member, onSuccess }: Team
             </div>
 
             <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                value={formData.email}
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                placeholder="team.member@example.com"
+              />
+            </div>
+          </div>
+
+          <div className="grid gap-4 md:grid-cols-2">
+            <div className="space-y-2">
               <Label htmlFor="role">Role *</Label>
               <Input
                 id="role"
@@ -156,15 +190,15 @@ export const TeamMemberDialog = ({ open, onOpenChange, member, onSuccess }: Team
                 required
               />
             </div>
-          </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="department">Department</Label>
-            <Input
-              id="department"
-              value={formData.department}
-              onChange={(e) => setFormData({ ...formData, department: e.target.value })}
-            />
+            <div className="space-y-2">
+              <Label htmlFor="department">Department</Label>
+              <Input
+                id="department"
+                value={formData.department}
+                onChange={(e) => setFormData({ ...formData, department: e.target.value })}
+              />
+            </div>
           </div>
 
           <div className="space-y-4">

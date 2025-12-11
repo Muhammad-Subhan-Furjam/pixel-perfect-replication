@@ -17,3 +17,9 @@ verify_jwt = true
 
 [functions.send-metric-reminders]
 verify_jwt = false
+
+[functions.send-team-member-welcome]
+verify_jwt = true
+
+[functions.send-report-reminders]
+verify_jwt = false
