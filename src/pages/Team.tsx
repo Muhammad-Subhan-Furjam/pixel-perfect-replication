@@ -14,6 +14,7 @@ import Footer from "@/components/Footer";
 interface TeamMember {
   id: string;
   name: string;
+  email: string | null;
   role: string;
   department: string | null;
   target_metrics: any;
