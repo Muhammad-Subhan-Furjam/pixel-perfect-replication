@@ -1,14 +1,14 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Header } from "@/components/Header";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Shield, UserCog, Users } from "lucide-react";
+import { Loader2, Shield, UserCog, Users, Crown, Briefcase } from "lucide-react";
 import Footer from "@/components/Footer";
 
 interface UserWithRole {
@@ -19,12 +19,19 @@ interface UserWithRole {
   can_manage_team: boolean;
 }
 
+type AppRole = "team_member" | "executive_assistant" | "hr";
+
 const Permissions = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState<string | null>(null);
+  const [savingRole, setSavingRole] = useState<string | null>(null);
   const [users, setUsers] = useState<UserWithRole[]>([]);
+
+  // Track current HR and EA
+  const currentHR = users.find((u) => u.role === "hr");
+  const currentEA = users.find((u) => u.role === "executive_assistant");
 
   useEffect(() => {
     if (user) {
@@ -130,6 +137,73 @@ const Permissions = () => {
     }
   };
 
+  const handleRoleChange = async (userId: string, newRole: AppRole) => {
+    const targetUser = users.find((u) => u.id === userId);
+    if (!targetUser) return;
+
+    // Check if trying to assign a role that's already taken
+    if (newRole === "hr" && currentHR && currentHR.id !== userId) {
+      toast({
+        title: "Role Already Assigned",
+        description: `${currentHR.full_name || currentHR.email} is currently the HR. Please remove their role first.`,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (newRole === "executive_assistant" && currentEA && currentEA.id !== userId) {
+      toast({
+        title: "Role Already Assigned",
+        description: `${currentEA.full_name || currentEA.email} is currently the Executive Assistant. Please remove their role first.`,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setSavingRole(userId);
+    try {
+      if (newRole === "team_member") {
+        // Remove the role entry entirely (they become a regular team member)
+        const { error } = await supabase
+          .from("user_roles")
+          .delete()
+          .eq("user_id", userId);
+
+        if (error) throw error;
+      } else {
+        // Upsert the new role
+        const { error } = await supabase
+          .from("user_roles")
+          .upsert({
+            user_id: userId,
+            role: newRole,
+          }, { onConflict: "user_id" });
+
+        if (error) throw error;
+      }
+
+      toast({
+        title: "Success",
+        description: `Role updated to ${formatRole(newRole)} successfully`,
+      });
+
+      // Update local state
+      setUsers((prev) =>
+        prev.map((u) =>
+          u.id === userId ? { ...u, role: newRole } : u
+        )
+      );
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setSavingRole(null);
+    }
+  };
+
   const getRoleBadgeVariant = (role: string) => {
     switch (role) {
       case "ceo":
@@ -149,6 +223,17 @@ const Permissions = () => {
       .replace(/\b\w/g, (l) => l.toUpperCase());
   };
 
+  const getRoleIcon = (role: string) => {
+    switch (role) {
+      case "executive_assistant":
+        return <Crown className="h-4 w-4" />;
+      case "hr":
+        return <Briefcase className="h-4 w-4" />;
+      default:
+        return null;
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
@@ -157,22 +242,39 @@ const Permissions = () => {
         <div className="mb-6 sm:mb-8">
           <h2 className="text-2xl sm:text-3xl font-bold mb-1 sm:mb-2">Access Permissions</h2>
           <p className="text-sm sm:text-base text-muted-foreground">
-            Manage who can add or remove team members
+            Manage roles and team management permissions
           </p>
         </div>
 
+        {/* Role Assignment Info */}
         <Card className="mb-6">
           <CardHeader>
             <div className="flex items-center gap-3">
               <Shield className="h-5 w-5 text-primary" />
               <div>
-                <CardTitle className="text-lg">Permission Management</CardTitle>
+                <CardTitle className="text-lg">Role & Permission Management</CardTitle>
                 <CardDescription>
-                  Grant team management access to Executive Assistants or HR staff
+                  Assign HR or Executive Assistant roles and grant team management access. Only one person can hold each special role at a time.
                 </CardDescription>
               </div>
             </div>
           </CardHeader>
+          <CardContent>
+            <div className="flex flex-wrap gap-4 text-sm">
+              <div className="flex items-center gap-2">
+                <Crown className="h-4 w-4 text-primary" />
+                <span className="text-muted-foreground">
+                  Executive Assistant: {currentEA ? (currentEA.full_name || currentEA.email) : "Not assigned"}
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Briefcase className="h-4 w-4 text-primary" />
+                <span className="text-muted-foreground">
+                  HR: {currentHR ? (currentHR.full_name || currentHR.email) : "Not assigned"}
+                </span>
+              </div>
+            </div>
+          </CardContent>
         </Card>
 
         {loading ? (
@@ -194,39 +296,77 @@ const Permissions = () => {
           <div className="space-y-4">
             {users.map((userData) => (
               <Card key={userData.id}>
-                <CardContent className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 py-4">
+                <CardContent className="flex flex-col gap-4 py-4">
+                  {/* User Info Row */}
                   <div className="flex items-center gap-4">
                     <div className="h-10 w-10 rounded-full bg-secondary flex items-center justify-center">
                       <UserCog className="h-5 w-5 text-muted-foreground" />
                     </div>
-                    <div>
+                    <div className="flex-1">
                       <p className="font-medium">
                         {userData.full_name || userData.email}
                       </p>
                       <div className="flex items-center gap-2 mt-1">
                         <p className="text-sm text-muted-foreground">{userData.email}</p>
-                        <Badge variant={getRoleBadgeVariant(userData.role)}>
+                        <Badge variant={getRoleBadgeVariant(userData.role)} className="flex items-center gap-1">
+                          {getRoleIcon(userData.role)}
                           {formatRole(userData.role)}
                         </Badge>
                       </div>
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-3">
-                    <Label htmlFor={`permission-${userData.id}`} className="text-sm">
-                      Can manage team
-                    </Label>
-                    {saving === userData.id ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : (
-                      <Switch
-                        id={`permission-${userData.id}`}
-                        checked={userData.can_manage_team}
-                        onCheckedChange={() =>
-                          handleTogglePermission(userData.id, userData.can_manage_team)
-                        }
-                      />
-                    )}
+                  {/* Controls Row */}
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-4 pl-14">
+                    {/* Role Selection */}
+                    <div className="flex items-center gap-2">
+                      <Label className="text-sm whitespace-nowrap">Role:</Label>
+                      {savingRole === userData.id ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Select
+                          value={userData.role}
+                          onValueChange={(value) => handleRoleChange(userData.id, value as AppRole)}
+                        >
+                          <SelectTrigger className="w-[180px]">
+                            <SelectValue placeholder="Select role" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="team_member">Team Member</SelectItem>
+                            <SelectItem 
+                              value="executive_assistant"
+                              disabled={!!currentEA && currentEA.id !== userData.id}
+                            >
+                              Executive Assistant {currentEA && currentEA.id !== userData.id ? "(Assigned)" : ""}
+                            </SelectItem>
+                            <SelectItem 
+                              value="hr"
+                              disabled={!!currentHR && currentHR.id !== userData.id}
+                            >
+                              HR {currentHR && currentHR.id !== userData.id ? "(Assigned)" : ""}
+                            </SelectItem>
+                          </SelectContent>
+                        </Select>
+                      )}
+                    </div>
+
+                    {/* Team Management Toggle */}
+                    <div className="flex items-center gap-3">
+                      <Label htmlFor={`permission-${userData.id}`} className="text-sm">
+                        Can manage team
+                      </Label>
+                      {saving === userData.id ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Switch
+                          id={`permission-${userData.id}`}
+                          checked={userData.can_manage_team}
+                          onCheckedChange={() =>
+                            handleTogglePermission(userData.id, userData.can_manage_team)
+                          }
+                        />
+                      )}
+                    </div>
                   </div>
                 </CardContent>
               </Card>
