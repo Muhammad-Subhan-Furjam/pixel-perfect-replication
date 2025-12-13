@@ -62,7 +62,7 @@ const handler = async (req: Request): Promise<Response> => {
     for (const member of membersToRemind) {
       try {
         const emailResponse = await resend.emails.send({
-          from: "ResultsBoard <onboarding@resend.dev>",
+          from: "WorkChief <notifications@workchief.ai>",
           to: [member.email],
           subject: "Daily Reminder: Submit Your Report to CEO",
           html: `
