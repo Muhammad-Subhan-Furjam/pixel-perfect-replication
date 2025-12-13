@@ -88,7 +88,7 @@ const handler = async (req: Request): Promise<Response> => {
       try {
         // Send reminder email
         const emailResponse = await resend.emails.send({
-          from: "ResultsBoard <onboarding@resend.dev>",
+          from: "WorkChief <notifications@workchief.ai>",
           to: [profile.email],
           subject: "Reminder: Submit Your Daily Metrics",
           html: `
