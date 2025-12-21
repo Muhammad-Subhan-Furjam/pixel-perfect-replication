@@ -88,16 +88,61 @@ const handler = async (req: Request): Promise<Response> => {
       try {
         // Send reminder email
         const emailResponse = await resend.emails.send({
-          from: "WorkChief <notifications@workchief.ai>",
+          from: "WorkChief <noreply@workchief.ai>",
           to: [profile.email],
-          subject: "Reminder: Submit Your Daily Metrics",
+          subject: "⏰ Reminder: Submit Your Daily Metrics",
           html: `
-            <h2>Hi ${member.name},</h2>
-            <p>This is a friendly reminder to submit your daily metrics for today.</p>
-            <p>Your performance data helps the team track progress and identify areas for improvement.</p>
-            <p>Please log in to ResultsBoard and submit your metrics as soon as possible.</p>
-            <br>
-            <p>Best regards,<br>ResultsBoard Team</p>
+            <!DOCTYPE html>
+            <html>
+            <head>
+              <meta charset="utf-8">
+              <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            </head>
+            <body style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; background-color: #f4f7fa;">
+              <div style="max-width: 600px; margin: 0 auto; padding: 40px 20px;">
+                <div style="background-color: #ffffff; border-radius: 16px; padding: 40px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);">
+                  <!-- Header -->
+                  <div style="text-align: center; margin-bottom: 30px;">
+                    <div style="width: 60px; height: 60px; background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); border-radius: 12px; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center;">
+                      <span style="font-size: 28px;">📊</span>
+                    </div>
+                    <h1 style="color: #1e293b; font-size: 24px; margin: 0 0 10px;">Metrics Reminder</h1>
+                    <p style="color: #64748b; font-size: 16px; margin: 0;">Time to log your daily performance!</p>
+                  </div>
+
+                  <!-- Greeting -->
+                  <p style="color: #334155; font-size: 16px; line-height: 1.6; margin-bottom: 20px;">
+                    Hi ${member.name},
+                  </p>
+                  <p style="color: #334155; font-size: 16px; line-height: 1.6; margin-bottom: 25px;">
+                    This is a friendly reminder to submit your daily metrics. Your performance data helps the team track progress and identify areas for improvement.
+                  </p>
+
+                  <!-- Info box -->
+                  <div style="background-color: #f5f3ff; border-radius: 12px; padding: 25px; margin-bottom: 25px; border-left: 4px solid #8b5cf6;">
+                    <p style="color: #475569; font-size: 15px; margin: 0;">
+                      📈 Tracking your metrics daily helps you see patterns, celebrate wins, and address challenges early.
+                    </p>
+                  </div>
+
+                  <!-- CTA Button -->
+                  <div style="text-align: center; margin-bottom: 25px;">
+                    <a href="https://resultsboard.lovable.app/metrics" 
+                       style="display: inline-block; background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-size: 16px; font-weight: 600; box-shadow: 0 4px 14px rgba(139, 92, 246, 0.4);">
+                      Submit Metrics Now →
+                    </a>
+                  </div>
+
+                  <!-- Footer -->
+                  <div style="border-top: 1px solid #e2e8f0; padding-top: 25px; text-align: center;">
+                    <p style="color: #94a3b8; font-size: 12px; margin: 0;">
+                      © 2024 ResultsBoard by WorkChief. All rights reserved.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </body>
+            </html>
           `,
         });
 
