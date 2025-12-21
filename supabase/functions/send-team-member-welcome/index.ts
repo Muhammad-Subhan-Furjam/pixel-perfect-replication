@@ -30,22 +30,76 @@ const handler = async (req: Request): Promise<Response> => {
     console.log(`Sending welcome email to ${email} for ${name}`);
 
     const emailResponse = await resend.emails.send({
-      from: "WorkChief <notifications@workchief.ai>",
+      from: "WorkChief <noreply@workchief.ai>",
       to: [email],
-      subject: "Welcome to the Team - ResultsBoard",
+      subject: "Welcome to the Team! 🎉",
       html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <h1 style="color: #333;">Welcome to the Team, ${name}!</h1>
-          <p>You have been added as a team member by the CEO.</p>
-          <div style="background: #f5f5f5; padding: 20px; border-radius: 8px; margin: 20px 0;">
-            <p><strong>Your Role:</strong> ${role}</p>
-            ${department ? `<p><strong>Department:</strong> ${department}</p>` : ""}
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        </head>
+        <body style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; background-color: #f4f7fa;">
+          <div style="max-width: 600px; margin: 0 auto; padding: 40px 20px;">
+            <div style="background-color: #ffffff; border-radius: 16px; padding: 40px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);">
+              <!-- Header -->
+              <div style="text-align: center; margin-bottom: 30px;">
+                <div style="width: 60px; height: 60px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); border-radius: 12px; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center;">
+                  <span style="font-size: 28px;">👋</span>
+                </div>
+                <h1 style="color: #1e293b; font-size: 28px; margin: 0 0 10px;">Welcome to the Team!</h1>
+                <p style="color: #64748b; font-size: 16px; margin: 0;">You've been added to ResultsBoard</p>
+              </div>
+
+              <!-- Greeting -->
+              <p style="color: #334155; font-size: 16px; line-height: 1.6; margin-bottom: 20px;">
+                Hi ${name},
+              </p>
+              <p style="color: #334155; font-size: 16px; line-height: 1.6; margin-bottom: 25px;">
+                Great news! You've been added as a team member on ResultsBoard. 
+                This platform helps track performance, manage daily check-ins, and keep everyone aligned on goals.
+              </p>
+
+              <!-- Role Info -->
+              <div style="background-color: #f8fafc; border-radius: 12px; padding: 25px; margin-bottom: 25px; border-left: 4px solid #10b981;">
+                <h2 style="color: #1e293b; font-size: 16px; margin: 0 0 15px;">Your Details</h2>
+                <p style="color: #475569; font-size: 15px; margin: 0 0 8px;"><strong>Role:</strong> ${role}</p>
+                ${department ? `<p style="color: #475569; font-size: 15px; margin: 0;"><strong>Department:</strong> ${department}</p>` : ""}
+              </div>
+
+              <!-- What to expect -->
+              <div style="background-color: #f8fafc; border-radius: 12px; padding: 25px; margin-bottom: 25px;">
+                <h2 style="color: #1e293b; font-size: 18px; margin: 0 0 15px;">What's Expected</h2>
+                <ul style="color: #475569; font-size: 15px; line-height: 1.8; padding-left: 20px; margin: 0;">
+                  <li>📊 Submit daily metrics and progress updates</li>
+                  <li>📝 Report any blockers or challenges</li>
+                  <li>✅ Track your KPIs and targets</li>
+                  <li>💬 Stay connected with your team</li>
+                </ul>
+              </div>
+
+              <!-- CTA Button -->
+              <div style="text-align: center; margin-bottom: 25px;">
+                <a href="https://resultsboard.lovable.app/auth" 
+                   style="display: inline-block; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-size: 16px; font-weight: 600; box-shadow: 0 4px 14px rgba(16, 185, 129, 0.4);">
+                  Log In to Get Started →
+                </a>
+              </div>
+
+              <!-- Footer -->
+              <div style="border-top: 1px solid #e2e8f0; padding-top: 25px; text-align: center;">
+                <p style="color: #64748b; font-size: 14px; margin: 0 0 10px;">
+                  Questions? Reply to this email and we'll help you out.
+                </p>
+                <p style="color: #94a3b8; font-size: 12px; margin: 0;">
+                  © 2024 ResultsBoard by WorkChief. All rights reserved.
+                </p>
+              </div>
+            </div>
           </div>
-          <p>As a team member, you will be expected to submit daily reports to keep the CEO updated on your progress and any blockers you may have.</p>
-          <p>Please log in to ResultsBoard to get started.</p>
-          <br>
-          <p>Best regards,<br>ResultsBoard Team</p>
-        </div>
+        </body>
+        </html>
       `,
     });
 
