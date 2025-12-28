@@ -24,7 +24,7 @@ const PLANS = {
     ],
   },
   pro: {
-    name: "ResultsBoard Pro",
+    name: "WorkChief Pro",
     price: "$29",
     period: "/month",
     priceId: "price_1SZxYdDIDTetc1phATFXNVmU",
@@ -48,7 +48,7 @@ export default function Subscription() {
     if (searchParams.get("success") === "true") {
       toast({
         title: "Subscription successful!",
-        description: "Welcome to ResultsBoard Pro. Enjoy your premium features!",
+        description: "Welcome to WorkChief Pro. Enjoy your premium features!",
       });
       refresh();
     } else if (searchParams.get("canceled") === "true") {

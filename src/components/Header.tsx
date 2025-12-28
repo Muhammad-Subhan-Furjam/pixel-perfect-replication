@@ -69,8 +69,8 @@ export const Header = () => {
     <header className="border-b border-border bg-card sticky top-0 z-50">
       <div className="container mx-auto px-4 py-3 flex items-center justify-between">
         <Link to="/dashboard" className="flex items-center space-x-2 sm:space-x-3">
-          <img src={logo} alt="ResultsBoard" className="h-7 w-7 sm:h-8 sm:w-8" />
-          <h1 className="text-lg sm:text-xl font-bold">ResultsBoard</h1>
+          <img src={logo} alt="WorkChief" className="h-7 w-7 sm:h-8 sm:w-8" />
+          <h1 className="text-lg sm:text-xl font-bold">WorkChief</h1>
         </Link>
 
         {/* Desktop Navigation */}

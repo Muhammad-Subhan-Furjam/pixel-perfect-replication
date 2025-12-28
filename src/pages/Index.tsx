@@ -28,8 +28,8 @@ const Index = () => {
       <header className="container mx-auto px-4 py-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
-            <img src={logo} alt="ResultsBoard" className="h-10 w-10" />
-            <span className="text-2xl font-bold">ResultsBoard</span>
+            <img src={logo} alt="WorkChief" className="h-10 w-10" />
+            <span className="text-2xl font-bold">WorkChief</span>
           </div>
           <Link to="/auth">
             <Button variant="outline">Sign In</Button>

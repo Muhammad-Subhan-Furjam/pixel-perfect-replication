@@ -33,7 +33,7 @@ const handler = async (req: Request): Promise<Response> => {
     const emailResponse = await resend.emails.send({
       from: "WorkChief <noreply@workchief.ai>",
       to: [email],
-      subject: "Welcome to ResultsBoard! 🎉",
+      subject: "Welcome to WorkChief! 🎉",
       html: `
         <!DOCTYPE html>
         <html>
@@ -49,7 +49,7 @@ const handler = async (req: Request): Promise<Response> => {
                 <div style="width: 60px; height: 60px; background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); border-radius: 12px; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center;">
                   <span style="font-size: 28px;">📊</span>
                 </div>
-                <h1 style="color: #1e293b; font-size: 28px; margin: 0 0 10px;">Welcome to ResultsBoard!</h1>
+                <h1 style="color: #1e293b; font-size: 28px; margin: 0 0 10px;">Welcome to WorkChief!</h1>
                 <p style="color: #64748b; font-size: 16px; margin: 0;">Your journey to better team management starts here</p>
               </div>
 
@@ -58,8 +58,8 @@ const handler = async (req: Request): Promise<Response> => {
                 Hi ${name},
               </p>
               <p style="color: #334155; font-size: 16px; line-height: 1.6; margin-bottom: 25px;">
-                Thank you for signing up for ResultsBoard! We're excited to have you on board. 
-                ResultsBoard is designed to help you track your team's performance, manage daily check-ins, 
+                Thank you for signing up for WorkChief! We're excited to have you on board. 
+                WorkChief is designed to help you track your team's performance, manage daily check-ins, 
                 and gain valuable insights into your organization's productivity.
               </p>
 
@@ -77,7 +77,7 @@ const handler = async (req: Request): Promise<Response> => {
 
               <!-- CTA Button -->
               <div style="text-align: center; margin-bottom: 25px;">
-                <a href="https://resultsboard.lovable.app/dashboard" 
+                <a href="https://workchief.ai/dashboard" 
                    style="display: inline-block; background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-size: 16px; font-weight: 600; box-shadow: 0 4px 14px rgba(59, 130, 246, 0.4);">
                   Get Started Now →
                 </a>
@@ -89,7 +89,7 @@ const handler = async (req: Request): Promise<Response> => {
                   Need help? Reply to this email and we'll be happy to assist.
                 </p>
                 <p style="color: #94a3b8; font-size: 12px; margin: 0;">
-                  © 2024 ResultsBoard by WorkChief. All rights reserved.
+                  © 2024 WorkChief. All rights reserved.
                 </p>
               </div>
             </div>
