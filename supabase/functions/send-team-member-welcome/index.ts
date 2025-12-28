@@ -30,7 +30,7 @@ const handler = async (req: Request): Promise<Response> => {
     console.log(`Sending welcome email to ${email} for ${name}`);
 
     const { data, error: resendError } = await resend.emails.send({
-      from: "WorkChief <noreply@workchief.ai>",
+      from: "WorkChief <onboarding@resend.dev>",
       to: [email],
       subject: "Welcome to the Team! 🎉",
       html: `
