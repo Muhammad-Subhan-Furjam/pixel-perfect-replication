@@ -49,7 +49,7 @@ const handler = async (req: Request): Promise<Response> => {
                   <span style="font-size: 28px;">👋</span>
                 </div>
                 <h1 style="color: #1e293b; font-size: 28px; margin: 0 0 10px;">Welcome to the Team!</h1>
-                <p style="color: #64748b; font-size: 16px; margin: 0;">You've been added to ResultsBoard</p>
+                <p style="color: #64748b; font-size: 16px; margin: 0;">You've been added to WorkChief</p>
               </div>
 
               <!-- Greeting -->
@@ -57,7 +57,7 @@ const handler = async (req: Request): Promise<Response> => {
                 Hi ${name},
               </p>
               <p style="color: #334155; font-size: 16px; line-height: 1.6; margin-bottom: 25px;">
-                Great news! You've been added as a team member on ResultsBoard. 
+                Great news! You've been added as a team member on WorkChief. 
                 This platform helps track performance, manage daily check-ins, and keep everyone aligned on goals.
               </p>
 
@@ -81,7 +81,7 @@ const handler = async (req: Request): Promise<Response> => {
 
               <!-- CTA Button -->
               <div style="text-align: center; margin-bottom: 25px;">
-                <a href="https://resultsboard.lovable.app/auth" 
+                <a href="https://workchief.ai/auth" 
                    style="display: inline-block; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-size: 16px; font-weight: 600; box-shadow: 0 4px 14px rgba(16, 185, 129, 0.4);">
                   Log In to Get Started →
                 </a>
@@ -93,7 +93,7 @@ const handler = async (req: Request): Promise<Response> => {
                   Questions? Reply to this email and we'll help you out.
                 </p>
                 <p style="color: #94a3b8; font-size: 12px; margin: 0;">
-                  © 2024 ResultsBoard by WorkChief. All rights reserved.
+                  © 2024 WorkChief. All rights reserved.
                 </p>
               </div>
             </div>

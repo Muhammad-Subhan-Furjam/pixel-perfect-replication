@@ -92,9 +92,9 @@ const handler = async (req: Request): Promise<Response> => {
           <h1 style="color: #333;">New Check-in Submitted</h1>
           <p>Hello ${profile.full_name || "there"},</p>
           <p>A new check-in has been submitted for <strong>${data.team_member_name || "a team member"}</strong>.</p>
-          <p>Log in to ResultsBoard to view the details and run an analysis.</p>
+          <p>Log in to WorkChief to view the details and run an analysis.</p>
           <br/>
-          <p style="color: #666; font-size: 14px;">Best regards,<br/>The ResultsBoard Team</p>
+          <p style="color: #666; font-size: 14px;">Best regards,<br/>The WorkChief Team</p>
         </div>
       `;
     } else {
@@ -108,9 +108,9 @@ const handler = async (req: Request): Promise<Response> => {
             <p style="margin: 0;"><strong>Score:</strong> ${data.score || "N/A"}</p>
             ${data.message ? `<p style="margin: 10px 0 0 0;"><strong>Summary:</strong> ${data.message}</p>` : ""}
           </div>
-          <p>Log in to ResultsBoard to view the full analysis.</p>
+          <p>Log in to WorkChief to view the full analysis.</p>
           <br/>
-          <p style="color: #666; font-size: 14px;">Best regards,<br/>The ResultsBoard Team</p>
+          <p style="color: #666; font-size: 14px;">Best regards,<br/>The WorkChief Team</p>
         </div>
       `;
     }

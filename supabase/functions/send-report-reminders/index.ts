@@ -104,7 +104,7 @@ const handler = async (req: Request): Promise<Response> => {
 
                   <!-- CTA Button -->
                   <div style="text-align: center; margin-bottom: 25px;">
-                    <a href="https://resultsboard.lovable.app/dashboard" 
+                    <a href="https://workchief.ai/dashboard" 
                        style="display: inline-block; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-size: 16px; font-weight: 600; box-shadow: 0 4px 14px rgba(245, 158, 11, 0.4);">
                       Submit Report Now →
                     </a>
@@ -113,7 +113,7 @@ const handler = async (req: Request): Promise<Response> => {
                   <!-- Footer -->
                   <div style="border-top: 1px solid #e2e8f0; padding-top: 25px; text-align: center;">
                     <p style="color: #94a3b8; font-size: 12px; margin: 0;">
-                      © 2024 ResultsBoard by WorkChief. All rights reserved.
+                      © 2024 WorkChief. All rights reserved.
                     </p>
                   </div>
                 </div>

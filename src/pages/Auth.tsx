@@ -126,7 +126,7 @@ const Auth = () => {
         <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <div className="flex justify-center mb-4">
-            <img src={logo} alt="ResultsBoard" className="h-12 w-12" />
+            <img src={logo} alt="WorkChief" className="h-12 w-12" />
           </div>
           {showSignedOutMessage && (
             <Alert className="mb-4 bg-muted">
@@ -139,7 +139,7 @@ const Auth = () => {
           <CardTitle>{isLogin ? "Sign In" : "Create Account"}</CardTitle>
           <CardDescription>
             {isLogin
-              ? "Sign in to access your ResultsBoard"
+              ? "Sign in to access your WorkChief dashboard"
               : "Create an account to get started"}
           </CardDescription>
         </CardHeader>
