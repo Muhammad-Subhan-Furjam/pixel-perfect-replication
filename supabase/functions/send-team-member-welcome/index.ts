@@ -29,7 +29,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log(`Sending welcome email to ${email} for ${name}`);
 
-    const emailResponse = await resend.emails.send({
+    const { data, error: resendError } = await resend.emails.send({
       from: "WorkChief <noreply@workchief.ai>",
       to: [email],
       subject: "Welcome to the Team! 🎉",
@@ -103,10 +103,21 @@ const handler = async (req: Request): Promise<Response> => {
       `,
     });
 
-    console.log("Welcome email sent successfully:", emailResponse);
+    if (resendError) {
+      console.error("Resend send failed:", resendError);
+      return new Response(
+        JSON.stringify({ success: false, error: resendError.message }),
+        {
+          status: 502,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
+    }
+
+    console.log("Welcome email queued successfully:", data);
 
     return new Response(
-      JSON.stringify({ success: true, message: "Welcome email sent" }),
+      JSON.stringify({ success: true, id: data?.id, message: "Welcome email queued" }),
       {
         status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" },

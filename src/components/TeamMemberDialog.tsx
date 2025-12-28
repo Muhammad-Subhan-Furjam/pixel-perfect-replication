@@ -114,7 +114,7 @@ export const TeamMemberDialog = ({ open, onOpenChange, member, onSuccess }: Team
         // Send welcome email if email is provided
         if (formData.email) {
           try {
-            await supabase.functions.invoke("send-team-member-welcome", {
+            const { error: emailError } = await supabase.functions.invoke("send-team-member-welcome", {
               body: {
                 email: formData.email,
                 name: formData.name,
@@ -122,8 +122,15 @@ export const TeamMemberDialog = ({ open, onOpenChange, member, onSuccess }: Team
                 department: formData.department,
               },
             });
-          } catch (emailError) {
+
+            if (emailError) throw emailError;
+          } catch (emailError: any) {
             console.error("Failed to send welcome email:", emailError);
+            toast({
+              title: "Welcome email failed",
+              description: "Team member was added, but the welcome email could not be sent.",
+              variant: "destructive",
+            });
           }
         }
 
