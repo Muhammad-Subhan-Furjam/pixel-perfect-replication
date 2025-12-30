@@ -88,6 +88,8 @@ const CheckIns = () => {
       const member = teamMembers.find((m) => m.id === selectedMember);
       if (!member) throw new Error("Team member not found");
 
+      const today = new Date().toISOString().split('T')[0];
+
       // Insert check-in
       const { data: checkIn, error: checkInError } = await supabase
         .from("check_ins")
@@ -96,12 +98,49 @@ const CheckIns = () => {
           team_member_id: selectedMember,
           metrics,
           notes,
-          date: new Date().toISOString().split('T')[0],
+          date: today,
         })
         .select()
         .single();
 
       if (checkInError) throw checkInError;
+
+      // Update or insert daily_metrics for this team member
+      const { data: existingMetrics, error: fetchError } = await supabase
+        .from("daily_metrics")
+        .select("id")
+        .eq("team_member_id", selectedMember)
+        .eq("date", today)
+        .maybeSingle();
+
+      if (fetchError) throw fetchError;
+
+      if (existingMetrics) {
+        // Update existing metrics
+        const { error: updateError } = await supabase
+          .from("daily_metrics")
+          .update({ 
+            metrics, 
+            notes: notes || null,
+            submitted_at: new Date().toISOString()
+          })
+          .eq("id", existingMetrics.id);
+
+        if (updateError) throw updateError;
+      } else {
+        // Insert new metrics
+        const { error: insertError } = await supabase
+          .from("daily_metrics")
+          .insert({
+            team_member_id: selectedMember,
+            user_id: user!.id,
+            date: today,
+            metrics,
+            notes: notes || null,
+          });
+
+        if (insertError) throw insertError;
+      }
 
       // Call AI analysis edge function
       const { data: analysis, error: analysisError } = await supabase.functions.invoke(
@@ -122,7 +161,7 @@ const CheckIns = () => {
 
       toast({
         title: "Success",
-        description: "Check-in submitted and analyzed successfully",
+        description: "Check-in submitted, metrics updated, and analyzed successfully",
       });
 
       // Reset form
