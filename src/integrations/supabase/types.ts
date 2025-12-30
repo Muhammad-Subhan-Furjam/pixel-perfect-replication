@@ -97,6 +97,13 @@ export type Database = {
             referencedRelation: "team_members"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "fk_check_ins_team_member"
+            columns: ["team_member_id"]
+            isOneToOne: false
+            referencedRelation: "team_members"
+            referencedColumns: ["id"]
+          },
         ]
       }
       daily_metrics: {
@@ -133,6 +140,13 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "daily_metrics_team_member_id_fkey"
+            columns: ["team_member_id"]
+            isOneToOne: false
+            referencedRelation: "team_members"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_daily_metrics_team_member"
             columns: ["team_member_id"]
             isOneToOne: false
             referencedRelation: "team_members"
@@ -212,6 +226,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "fk_reminder_logs_team_member"
+            columns: ["team_member_id"]
+            isOneToOne: false
+            referencedRelation: "team_members"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "reminder_logs_team_member_id_fkey"
             columns: ["team_member_id"]
             isOneToOne: false
@@ -252,6 +273,13 @@ export type Database = {
           team_member_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "fk_team_member_reports_team_member"
+            columns: ["team_member_id"]
+            isOneToOne: false
+            referencedRelation: "team_members"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "team_member_reports_recipient_team_member_id_fkey"
             columns: ["recipient_team_member_id"]

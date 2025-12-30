@@ -78,6 +78,32 @@ const Team = () => {
 
     setDeleting(true);
     try {
+      // Get the team member to check if they have an auth_user_id
+      const memberData = teamMembers.find(m => m.id === memberToDelete);
+      
+      // First get the team member's auth_user_id if exists
+      const { data: teamMember } = await supabase
+        .from("team_members")
+        .select("auth_user_id")
+        .eq("id", memberToDelete)
+        .maybeSingle();
+
+      // If the team member has an auth account, clean up their roles and permissions
+      if (teamMember?.auth_user_id) {
+        // Remove user roles
+        await supabase
+          .from("user_roles")
+          .delete()
+          .eq("user_id", teamMember.auth_user_id);
+
+        // Remove user permissions
+        await supabase
+          .from("user_permissions")
+          .delete()
+          .eq("user_id", teamMember.auth_user_id);
+      }
+
+      // Delete the team member (cascade will handle reports, metrics, check-ins, etc.)
       const { error } = await supabase
         .from("team_members")
         .delete()
@@ -87,7 +113,7 @@ const Team = () => {
 
       toast({
         title: "Success",
-        description: "Team member deleted successfully",
+        description: "Team member and all related data deleted successfully",
       });
 
       fetchTeamMembers();
