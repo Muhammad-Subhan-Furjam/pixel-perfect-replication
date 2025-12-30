@@ -59,6 +59,43 @@ const Metrics = () => {
     }
   }, [user, roleLoading, isCEO, selectedDate, navigate]);
 
+  // Real-time subscription for report updates
+  useEffect(() => {
+    if (!user || !isCEO) return;
+
+    const channel = supabase
+      .channel('metrics-reports-realtime')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'team_member_reports'
+        },
+        () => {
+          // Refetch when a new report is submitted
+          fetchTeamMetrics();
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'check_ins'
+        },
+        () => {
+          // Refetch when a new check-in is created
+          fetchTeamMetrics();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user, isCEO, selectedDate]);
+
   const fetchTeamMetrics = async () => {
     setLoading(true);
     try {
