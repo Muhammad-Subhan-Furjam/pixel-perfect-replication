@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { useUserRole } from "@/hooks/useUserRole";
 import logo from "@/assets/logo.png";
 import { LogOut, Crown, Settings, Menu } from "lucide-react";
 import { NotificationBell } from "@/components/NotificationBell";
@@ -8,7 +9,8 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 
-const navItems = [
+// CEO-only navigation items
+const ceoNavItems = [
   { label: "Dashboard", path: "/dashboard" },
   { label: "Team", path: "/team" },
   { label: "Check-ins", path: "/check-ins" },
@@ -19,8 +21,24 @@ const navItems = [
   { label: "Subscribers", path: "/subscribers" },
 ];
 
+// Team member navigation items
+const teamMemberNavItems = [
+  { label: "Dashboard", path: "/dashboard" },
+  { label: "Metrics", path: "/metrics" },
+  { label: "Reports", path: "/reports" },
+];
+
+// HR/EA navigation items (can manage team)
+const managerNavItems = [
+  { label: "Dashboard", path: "/dashboard" },
+  { label: "Team", path: "/team" },
+  { label: "Metrics", path: "/metrics" },
+  { label: "Analytics", path: "/analytics" },
+];
+
 export const Header = () => {
   const { user, signOut } = useAuth();
+  const { role, canManageTeam, loading: roleLoading } = useUserRole();
   const navigate = useNavigate();
   const location = useLocation();
   const [open, setOpen] = useState(false);
@@ -31,6 +49,20 @@ export const Header = () => {
   };
 
   const isActive = (path: string) => location.pathname === path;
+
+  // Determine which nav items to show based on role
+  const getNavItems = () => {
+    if (role === "ceo") {
+      return ceoNavItems;
+    }
+    if (role === "hr" || role === "executive_assistant" || canManageTeam) {
+      return managerNavItems;
+    }
+    return teamMemberNavItems;
+  };
+
+  const navItems = getNavItems();
+  const showPlans = role === "ceo";
 
   return (
     <header className="border-b border-border bg-card sticky top-0 z-50">
@@ -82,7 +114,7 @@ export const Header = () => {
         </div>
       </div>
 
-      {/* Navigation row: All buttons visible */}
+      {/* Navigation row: Role-based nav items */}
       <div className="container mx-auto px-4 pb-3">
         <nav className="flex flex-wrap items-center gap-1 sm:gap-2">
           {navItems.map((item) => (
@@ -99,20 +131,22 @@ export const Header = () => {
               <Link to={item.path}>{item.label}</Link>
             </Button>
           ))}
-          <Button
-            variant="ghost"
-            size="sm"
-            asChild
-            className={cn(
-              "text-xs sm:text-sm px-2 sm:px-3",
-              isActive("/subscription") && "bg-accent text-accent-foreground"
-            )}
-          >
-            <Link to="/subscription">
-              <Crown className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
-              Plans
-            </Link>
-          </Button>
+          {showPlans && (
+            <Button
+              variant="ghost"
+              size="sm"
+              asChild
+              className={cn(
+                "text-xs sm:text-sm px-2 sm:px-3",
+                isActive("/subscription") && "bg-accent text-accent-foreground"
+              )}
+            >
+              <Link to="/subscription">
+                <Crown className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
+                Plans
+              </Link>
+            </Button>
+          )}
         </nav>
       </div>
     </header>
