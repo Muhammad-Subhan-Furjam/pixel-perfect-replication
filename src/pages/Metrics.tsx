@@ -6,11 +6,14 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Header } from "@/components/Header";
 import { useAuth } from "@/contexts/AuthContext";
+import { useUserRole } from "@/hooks/useUserRole";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, CheckCircle, AlertCircle } from "lucide-react";
+import { Loader2, CheckCircle, AlertCircle, Users, Calendar } from "lucide-react";
 import { format } from "date-fns";
 import Footer from "@/components/Footer";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
 
 interface TeamMember {
   id: string;
@@ -25,6 +28,16 @@ interface TodayMetrics {
   metrics: Record<string, string | number>;
   notes: string | null;
   submitted_at: string;
+}
+
+interface TeamMemberMetrics {
+  id: string;
+  name: string;
+  role: string;
+  department_type: string | null;
+  metrics: Record<string, string | number> | null;
+  notes: string | null;
+  submitted_at: string | null;
 }
 
 // Type guard for metrics
@@ -43,6 +56,7 @@ const techMetricDefaults = {
 
 const Metrics = () => {
   const { user } = useAuth();
+  const { role, loading: roleLoading } = useUserRole();
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -50,12 +64,67 @@ const Metrics = () => {
   const [todayMetrics, setTodayMetrics] = useState<TodayMetrics | null>(null);
   const [metrics, setMetrics] = useState<Record<string, string>>({});
   const [notes, setNotes] = useState("");
+  
+  // CEO view state
+  const [teamMetrics, setTeamMetrics] = useState<TeamMemberMetrics[]>([]);
+  const [selectedDate, setSelectedDate] = useState(format(new Date(), "yyyy-MM-dd"));
+
+  const isCEO = role === "ceo";
 
   useEffect(() => {
-    if (user) {
-      fetchTeamMemberData();
+    if (user && !roleLoading) {
+      if (isCEO) {
+        fetchTeamMetrics();
+      } else {
+        fetchTeamMemberData();
+      }
     }
-  }, [user]);
+  }, [user, roleLoading, isCEO, selectedDate]);
+
+  const fetchTeamMetrics = async () => {
+    setLoading(true);
+    try {
+      // Get all team members
+      const { data: members, error: membersError } = await supabase
+        .from("team_members")
+        .select("id, name, role, department_type")
+        .eq("user_id", user?.id);
+
+      if (membersError) throw membersError;
+
+      // Get today's metrics for all team members
+      const { data: metricsData, error: metricsError } = await supabase
+        .from("daily_metrics")
+        .select("team_member_id, metrics, notes, submitted_at")
+        .eq("date", selectedDate);
+
+      if (metricsError) throw metricsError;
+
+      // Combine data
+      const combined: TeamMemberMetrics[] = (members || []).map(member => {
+        const memberMetrics = metricsData?.find(m => m.team_member_id === member.id);
+        return {
+          id: member.id,
+          name: member.name,
+          role: member.role,
+          department_type: member.department_type,
+          metrics: memberMetrics && isValidMetrics(memberMetrics.metrics) ? memberMetrics.metrics : null,
+          notes: memberMetrics?.notes || null,
+          submitted_at: memberMetrics?.submitted_at || null,
+        };
+      });
+
+      setTeamMetrics(combined);
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const fetchTeamMemberData = async () => {
     setLoading(true);
@@ -185,7 +254,7 @@ const Metrics = () => {
     }
   };
 
-  if (loading) {
+  if (loading || roleLoading) {
     return (
       <div className="min-h-screen bg-background flex flex-col">
         <Header />
@@ -197,6 +266,114 @@ const Metrics = () => {
     );
   }
 
+  // CEO View - Team Metrics Dashboard
+  if (isCEO) {
+    const submittedCount = teamMetrics.filter(m => m.metrics !== null).length;
+    const totalCount = teamMetrics.length;
+
+    return (
+      <div className="min-h-screen bg-background">
+        <Header />
+        <main className="container mx-auto px-4 py-6 sm:py-8">
+          <div className="mb-6 sm:mb-8">
+            <h2 className="text-2xl sm:text-3xl font-bold mb-1 sm:mb-2">Team Metrics</h2>
+            <p className="text-sm sm:text-base text-muted-foreground">
+              View daily performance metrics submitted by your team
+            </p>
+          </div>
+
+          <div className="flex flex-col sm:flex-row gap-4 mb-6">
+            <div className="flex items-center gap-2">
+              <Calendar className="h-4 w-4 text-muted-foreground" />
+              <Input
+                type="date"
+                value={selectedDate}
+                onChange={(e) => setSelectedDate(e.target.value)}
+                className="w-auto"
+              />
+            </div>
+            <div className="flex items-center gap-2">
+              <Users className="h-4 w-4 text-muted-foreground" />
+              <span className="text-sm text-muted-foreground">
+                {submittedCount} of {totalCount} submitted
+              </span>
+            </div>
+          </div>
+
+          {teamMetrics.length === 0 ? (
+            <Card>
+              <CardContent className="flex flex-col items-center justify-center py-12">
+                <Users className="h-12 w-12 text-muted-foreground mb-4" />
+                <p className="text-muted-foreground text-center">
+                  No team members found. Add team members to see their metrics.
+                </p>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="space-y-4">
+              {teamMetrics.map((member) => (
+                <Card key={member.id}>
+                  <CardHeader className="pb-3">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                      <div>
+                        <CardTitle className="text-lg">{member.name}</CardTitle>
+                        <CardDescription>
+                          {member.role}
+                          {member.department_type === "tech" && " • Tech Team"}
+                        </CardDescription>
+                      </div>
+                      {member.metrics ? (
+                        <Badge variant="default" className="w-fit bg-success hover:bg-success/90">
+                          <CheckCircle className="h-3 w-3 mr-1" />
+                          Submitted at {format(new Date(member.submitted_at!), "h:mm a")}
+                        </Badge>
+                      ) : (
+                        <Badge variant="secondary" className="w-fit">
+                          <AlertCircle className="h-3 w-3 mr-1" />
+                          Not submitted
+                        </Badge>
+                      )}
+                    </div>
+                  </CardHeader>
+                  {member.metrics && (
+                    <CardContent>
+                      <div className="overflow-x-auto">
+                        <Table>
+                          <TableHeader>
+                            <TableRow>
+                              <TableHead>Metric</TableHead>
+                              <TableHead>Value</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {Object.entries(member.metrics).map(([key, value]) => (
+                              <TableRow key={key}>
+                                <TableCell className="font-medium">{key}</TableCell>
+                                <TableCell>{value || "-"}</TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      </div>
+                      {member.notes && (
+                        <div className="mt-4 p-3 bg-muted rounded-md">
+                          <p className="text-sm font-medium mb-1">Notes:</p>
+                          <p className="text-sm text-muted-foreground">{member.notes}</p>
+                        </div>
+                      )}
+                    </CardContent>
+                  )}
+                </Card>
+              ))}
+            </div>
+          )}
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
+  // Team Member View - Submit Own Metrics
   if (!teamMember) {
     return (
       <div className="min-h-screen bg-background flex flex-col">
