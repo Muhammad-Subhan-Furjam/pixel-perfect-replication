@@ -9,7 +9,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useUserRole } from "@/hooks/useUserRole";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, CheckCircle, AlertCircle, Users, Calendar, Download } from "lucide-react";
+import { Loader2, CheckCircle, AlertCircle, Users, Calendar, Download, FileCheck } from "lucide-react";
 import { format } from "date-fns";
 import Footer from "@/components/Footer";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -39,6 +39,8 @@ interface TeamMemberMetrics {
   metrics: Record<string, string | number> | null;
   notes: string | null;
   submitted_at: string | null;
+  hasCheckIn: boolean;
+  checkInTime: string | null;
 }
 
 // Type guard for metrics
@@ -101,9 +103,18 @@ const Metrics = () => {
 
       if (metricsError) throw metricsError;
 
+      // Get check-ins for the selected date
+      const { data: checkInsData, error: checkInsError } = await supabase
+        .from("check_ins")
+        .select("team_member_id, created_at")
+        .eq("date", selectedDate);
+
+      if (checkInsError) throw checkInsError;
+
       // Combine data
       const combined: TeamMemberMetrics[] = (members || []).map(member => {
         const memberMetrics = metricsData?.find(m => m.team_member_id === member.id);
+        const memberCheckIn = checkInsData?.find(c => c.team_member_id === member.id);
         return {
           id: member.id,
           name: member.name,
@@ -112,6 +123,8 @@ const Metrics = () => {
           metrics: memberMetrics && isValidMetrics(memberMetrics.metrics) ? memberMetrics.metrics : null,
           notes: memberMetrics?.notes || null,
           submitted_at: memberMetrics?.submitted_at || null,
+          hasCheckIn: !!memberCheckIn,
+          checkInTime: memberCheckIn?.created_at || null,
         };
       });
 
@@ -411,17 +424,25 @@ const Metrics = () => {
                           {member.department_type === "tech" && " • Tech Team"}
                         </CardDescription>
                       </div>
-                      {member.metrics ? (
-                        <Badge variant="default" className="w-fit bg-success hover:bg-success/90">
-                          <CheckCircle className="h-3 w-3 mr-1" />
-                          Submitted at {format(new Date(member.submitted_at!), "h:mm a")}
-                        </Badge>
-                      ) : (
-                        <Badge variant="secondary" className="w-fit">
-                          <AlertCircle className="h-3 w-3 mr-1" />
-                          Not submitted
-                        </Badge>
-                      )}
+                      <div className="flex flex-wrap gap-2">
+                        {member.hasCheckIn && (
+                          <Badge variant="default" className="w-fit bg-primary hover:bg-primary/90">
+                            <FileCheck className="h-3 w-3 mr-1" />
+                            Analyzed at {format(new Date(member.checkInTime!), "h:mm a")}
+                          </Badge>
+                        )}
+                        {member.metrics ? (
+                          <Badge variant="default" className="w-fit bg-success hover:bg-success/90">
+                            <CheckCircle className="h-3 w-3 mr-1" />
+                            Metrics at {format(new Date(member.submitted_at!), "h:mm a")}
+                          </Badge>
+                        ) : (
+                          <Badge variant="secondary" className="w-fit">
+                            <AlertCircle className="h-3 w-3 mr-1" />
+                            Metrics not submitted
+                          </Badge>
+                        )}
+                      </div>
                     </div>
                   </CardHeader>
                   {member.metrics && (
