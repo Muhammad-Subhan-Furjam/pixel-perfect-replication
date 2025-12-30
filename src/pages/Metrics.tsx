@@ -115,20 +115,28 @@ const Metrics = () => {
 
       if (metricsError) throw metricsError;
 
-      // Get check-ins for the selected date
+      // Build local-day time range (converted to UTC ISO for timestamp filtering)
+      const dayStart = new Date(`${selectedDate}T00:00:00`);
+      const dayEnd = new Date(`${selectedDate}T23:59:59.999`);
+      const dayStartIso = dayStart.toISOString();
+      const dayEndIso = dayEnd.toISOString();
+
+      // Get check-ins for the selected day (based on created_at timestamps)
       const { data: checkInsData, error: checkInsError } = await supabase
         .from("check_ins")
         .select("team_member_id, created_at")
-        .eq("date", selectedDate);
+        .gte("created_at", dayStartIso)
+        .lt("created_at", dayEndIso);
 
       if (checkInsError) throw checkInsError;
 
-      // Get team member reports for the selected date (submitted by team members, not CEO)
+      // Get team member reports for the selected day (submitted by team members, not CEO)
       const { data: reportsData, error: reportsError } = await supabase
         .from("team_member_reports")
         .select("team_member_id, created_at")
-        .eq("date", selectedDate)
-        .eq("is_from_ceo", false);
+        .eq("is_from_ceo", false)
+        .gte("created_at", dayStartIso)
+        .lt("created_at", dayEndIso);
 
       if (reportsError) throw reportsError;
 
