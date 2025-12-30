@@ -301,12 +301,12 @@ const Metrics = () => {
                             <CheckCircle className="h-3 w-3 mr-1" />
                             Metrics at {format(new Date(member.submitted_at!), "h:mm a")}
                           </Badge>
-                        ) : (
+                        ) : !member.hasReport ? (
                           <Badge variant="secondary" className="w-fit">
                             <AlertCircle className="h-3 w-3 mr-1" />
-                            No report submitted
+                            Report not submitted
                           </Badge>
-                        )}
+                        ) : null}
                       </div>
                     </div>
                   </CardHeader>
