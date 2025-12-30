@@ -45,23 +45,23 @@ const Metrics = () => {
   const [teamMetrics, setTeamMetrics] = useState<TeamMemberMetrics[]>([]);
   const [selectedDate, setSelectedDate] = useState(format(new Date(), "yyyy-MM-dd"));
 
-  const isCEO = role === "ceo";
+  const isManager = role === "ceo" || role === "hr" || role === "executive_assistant";
 
   useEffect(() => {
-    // Redirect non-CEO users to Reports page
-    if (!roleLoading && !isCEO) {
+    // Redirect regular team members to Reports page
+    if (!roleLoading && !isManager) {
       navigate("/reports", { replace: true });
       return;
     }
     
-    if (user && !roleLoading && isCEO) {
+    if (user && !roleLoading && isManager) {
       fetchTeamMetrics();
     }
-  }, [user, roleLoading, isCEO, selectedDate, navigate]);
+  }, [user, roleLoading, isManager, selectedDate, navigate]);
 
   // Real-time subscription for report updates
   useEffect(() => {
-    if (!user || !isCEO) return;
+    if (!user || !isManager) return;
 
     const channel = supabase
       .channel('metrics-reports-realtime')
@@ -94,7 +94,7 @@ const Metrics = () => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [user, isCEO, selectedDate]);
+  }, [user, isManager, selectedDate]);
 
   const fetchTeamMetrics = async () => {
     setLoading(true);

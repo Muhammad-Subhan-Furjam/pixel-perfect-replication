@@ -30,6 +30,7 @@ const teamMemberNavItems = [
 const managerNavItems = [
   { label: "Dashboard", path: "/dashboard" },
   { label: "Team", path: "/team" },
+  { label: "Check-ins", path: "/check-ins" },
   { label: "Metrics", path: "/metrics" },
   { label: "Analytics", path: "/analytics" },
 ];
