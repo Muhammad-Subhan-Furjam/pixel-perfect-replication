@@ -143,14 +143,30 @@ const Metrics = () => {
   const fetchTeamMemberData = async () => {
     setLoading(true);
     try {
-      // Find the team member linked to this auth user
-      const { data: memberData, error: memberError } = await supabase
-        .from("team_members")
-        .select("*")
-        .eq("auth_user_id", user?.id)
-        .maybeSingle();
+      const fetchLinkedTeamMember = async () => {
+        const { data, error } = await supabase
+          .from("team_members")
+          .select("*")
+          .eq("auth_user_id", user?.id)
+          .maybeSingle();
 
-      if (memberError) throw memberError;
+        if (error) throw error;
+        return data;
+      };
+
+      // Find the team member linked to this auth user
+      let memberData = await fetchLinkedTeamMember();
+
+      // If not linked yet, try to auto-link by matching the login email to an existing team member record
+      if (!memberData) {
+        try {
+          await supabase.functions.invoke("link-team-member");
+        } catch {
+          // Ignore linking failures; UI will show the contact-manager message
+        }
+
+        memberData = await fetchLinkedTeamMember();
+      }
 
       if (memberData) {
         const parsedMember: TeamMember = {
