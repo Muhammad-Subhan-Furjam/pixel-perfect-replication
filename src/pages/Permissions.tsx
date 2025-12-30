@@ -180,6 +180,26 @@ const Permissions = () => {
           }, { onConflict: "user_id" });
 
         if (error) throw error;
+
+        // Send role assignment notification email
+        try {
+          const { data: ceoProfile } = await supabase
+            .from("profiles")
+            .select("full_name")
+            .eq("id", user?.id)
+            .single();
+
+          await supabase.functions.invoke("send-role-assignment-email", {
+            body: {
+              user_id: userId,
+              role: newRole,
+              assigned_by_name: ceoProfile?.full_name || "CEO",
+            },
+          });
+        } catch (emailError) {
+          console.error("Failed to send role assignment email:", emailError);
+          // Don't fail the role change if email fails
+        }
       }
 
       toast({
