@@ -8,6 +8,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
+import { useRoleRedirect } from "@/hooks/useRoleRedirect";
 import logo from "@/assets/logo.png";
 import { LogOut } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
@@ -38,6 +39,7 @@ const Auth = () => {
   const location = useLocation();
   const { user } = useAuth();
   const { toast } = useToast();
+  const { getRedirectPath } = useRoleRedirect();
 
   const showSignedOutMessage = location.state?.signedOut === true;
 
@@ -46,7 +48,8 @@ const Auth = () => {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/dashboard`,
+          // Redirect to auth page first, which will then redirect based on role
+          redirectTo: `${window.location.origin}/auth`,
         },
       });
       if (error) throw error;
@@ -61,9 +64,11 @@ const Auth = () => {
 
   useEffect(() => {
     if (user) {
-      navigate("/dashboard");
+      getRedirectPath(user.id).then((path) => {
+        navigate(path);
+      });
     }
-  }, [user, navigate]);
+  }, [user, navigate, getRedirectPath]);
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -82,7 +87,13 @@ const Auth = () => {
           title: "Welcome back!",
           description: "You've successfully signed in.",
         });
-        navigate("/dashboard");
+        
+        // Get role-based redirect path
+        const { data: { user: signedInUser } } = await supabase.auth.getUser();
+        if (signedInUser) {
+          const redirectPath = await getRedirectPath(signedInUser.id);
+          navigate(redirectPath);
+        }
       } else {
         const redirectUrl = `${window.location.origin}/`;
         
