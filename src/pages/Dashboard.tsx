@@ -40,19 +40,19 @@ const Dashboard = () => {
   const [checkIns, setCheckIns] = useState<CheckIn[]>([]);
   const [teamMemberCount, setTeamMemberCount] = useState(0);
 
-  const isCEO = role === "ceo";
+  const isManager = role === "ceo" || role === "hr" || role === "executive_assistant";
 
   useEffect(() => {
-    // Redirect non-CEO users to Reports page
-    if (!roleLoading && !isCEO) {
+    // Redirect regular team members to Reports page
+    if (!roleLoading && !isManager) {
       navigate("/reports", { replace: true });
       return;
     }
     
-    if (user && !roleLoading && isCEO) {
+    if (user && !roleLoading && isManager) {
       fetchCEODashboardData();
     }
-  }, [user, roleLoading, isCEO, navigate]);
+  }, [user, roleLoading, isManager, navigate]);
 
   const fetchCEODashboardData = async () => {
     setLoading(true);
@@ -153,7 +153,9 @@ const Dashboard = () => {
 
       <main className="container mx-auto px-4 py-6 sm:py-8">
         <div className="mb-6 sm:mb-8">
-          <h2 className="text-2xl sm:text-3xl font-bold mb-2">Good morning, CEO</h2>
+          <h2 className="text-2xl sm:text-3xl font-bold mb-2">
+            Good morning{role === "ceo" ? ", CEO" : role === "hr" ? ", HR Manager" : ", Executive Assistant"}
+          </h2>
           <p className="text-sm sm:text-base text-muted-foreground">Here's what's happening with your team today</p>
         </div>
 
