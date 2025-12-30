@@ -21,10 +21,8 @@ const ceoNavItems = [
   { label: "Subscribers", path: "/subscribers" },
 ];
 
-// Team member navigation items
+// Team member navigation items - only Reports
 const teamMemberNavItems = [
-  { label: "Dashboard", path: "/dashboard" },
-  { label: "Metrics", path: "/metrics" },
   { label: "Reports", path: "/reports" },
 ];
 

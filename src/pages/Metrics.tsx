@@ -2,34 +2,18 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Header } from "@/components/Header";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserRole } from "@/hooks/useUserRole";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, CheckCircle, AlertCircle, Users, Calendar, Download, FileCheck } from "lucide-react";
+import { Loader2, CheckCircle, AlertCircle, Users, Calendar, Download, FileCheck, FileText } from "lucide-react";
 import { format } from "date-fns";
 import Footer from "@/components/Footer";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import jsPDF from "jspdf";
-
-interface TeamMember {
-  id: string;
-  name: string;
-  role: string;
-  department_type: string | null;
-  target_metrics: Record<string, string | number> | null;
-}
-
-interface TodayMetrics {
-  id: string;
-  metrics: Record<string, string | number>;
-  notes: string | null;
-  submitted_at: string;
-}
+import { useNavigate } from "react-router-dom";
 
 interface TeamMemberMetrics {
   id: string;
@@ -41,6 +25,8 @@ interface TeamMemberMetrics {
   submitted_at: string | null;
   hasCheckIn: boolean;
   checkInTime: string | null;
+  hasReport: boolean;
+  reportTime: string | null;
 }
 
 // Type guard for metrics
@@ -48,25 +34,12 @@ const isValidMetrics = (data: unknown): data is Record<string, string | number> 
   return typeof data === 'object' && data !== null && !Array.isArray(data);
 };
 
-const techMetricDefaults = {
-  "Code Commits": "",
-  "Pull Requests": "",
-  "Code Reviews": "",
-  "Tickets Completed": "",
-  "Bugs Fixed": "",
-  "Sprint Velocity": "",
-};
-
 const Metrics = () => {
   const { user } = useAuth();
   const { role, loading: roleLoading } = useUserRole();
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
-  const [submitting, setSubmitting] = useState(false);
-  const [teamMember, setTeamMember] = useState<TeamMember | null>(null);
-  const [todayMetrics, setTodayMetrics] = useState<TodayMetrics | null>(null);
-  const [metrics, setMetrics] = useState<Record<string, string>>({});
-  const [notes, setNotes] = useState("");
   
   // CEO view state
   const [teamMetrics, setTeamMetrics] = useState<TeamMemberMetrics[]>([]);
@@ -75,14 +48,16 @@ const Metrics = () => {
   const isCEO = role === "ceo";
 
   useEffect(() => {
-    if (user && !roleLoading) {
-      if (isCEO) {
-        fetchTeamMetrics();
-      } else {
-        fetchTeamMemberData();
-      }
+    // Redirect non-CEO users to Reports page
+    if (!roleLoading && !isCEO) {
+      navigate("/reports", { replace: true });
+      return;
     }
-  }, [user, roleLoading, isCEO, selectedDate]);
+    
+    if (user && !roleLoading && isCEO) {
+      fetchTeamMetrics();
+    }
+  }, [user, roleLoading, isCEO, selectedDate, navigate]);
 
   const fetchTeamMetrics = async () => {
     setLoading(true);
@@ -111,10 +86,20 @@ const Metrics = () => {
 
       if (checkInsError) throw checkInsError;
 
+      // Get team member reports for the selected date (submitted by team members, not CEO)
+      const { data: reportsData, error: reportsError } = await supabase
+        .from("team_member_reports")
+        .select("team_member_id, created_at")
+        .eq("date", selectedDate)
+        .eq("is_from_ceo", false);
+
+      if (reportsError) throw reportsError;
+
       // Combine data
       const combined: TeamMemberMetrics[] = (members || []).map(member => {
         const memberMetrics = metricsData?.find(m => m.team_member_id === member.id);
         const memberCheckIn = checkInsData?.find(c => c.team_member_id === member.id);
+        const memberReport = reportsData?.find(r => r.team_member_id === member.id);
         return {
           id: member.id,
           name: member.name,
@@ -125,6 +110,8 @@ const Metrics = () => {
           submitted_at: memberMetrics?.submitted_at || null,
           hasCheckIn: !!memberCheckIn,
           checkInTime: memberCheckIn?.created_at || null,
+          hasReport: !!memberReport,
+          reportTime: memberReport?.created_at || null,
         };
       });
 
@@ -140,149 +127,6 @@ const Metrics = () => {
     }
   };
 
-  const fetchTeamMemberData = async () => {
-    setLoading(true);
-    try {
-      const fetchLinkedTeamMember = async () => {
-        const { data, error } = await supabase
-          .from("team_members")
-          .select("*")
-          .eq("auth_user_id", user?.id)
-          .maybeSingle();
-
-        if (error) throw error;
-        return data;
-      };
-
-      // Find the team member linked to this auth user
-      let memberData = await fetchLinkedTeamMember();
-
-      // If not linked yet, try to auto-link by matching the login email to an existing team member record
-      if (!memberData) {
-        try {
-          await supabase.functions.invoke("link-team-member");
-        } catch {
-          // Ignore linking failures; UI will show the contact-manager message
-        }
-
-        memberData = await fetchLinkedTeamMember();
-      }
-
-      if (memberData) {
-        const parsedMember: TeamMember = {
-          id: memberData.id,
-          name: memberData.name,
-          role: memberData.role,
-          department_type: memberData.department_type,
-          target_metrics: isValidMetrics(memberData.target_metrics) ? memberData.target_metrics : null,
-        };
-        setTeamMember(parsedMember);
-
-        // Check if metrics already submitted today
-        const { data: metricsData, error: metricsError } = await supabase
-          .from("daily_metrics")
-          .select("*")
-          .eq("team_member_id", memberData.id)
-          .eq("date", format(new Date(), "yyyy-MM-dd"))
-          .maybeSingle();
-
-        if (metricsError) throw metricsError;
-
-        if (metricsData && isValidMetrics(metricsData.metrics)) {
-          setTodayMetrics({
-            id: metricsData.id,
-            metrics: metricsData.metrics,
-            notes: metricsData.notes,
-            submitted_at: metricsData.submitted_at,
-          });
-          setMetrics(metricsData.metrics as Record<string, string>);
-          setNotes(metricsData.notes || "");
-        } else {
-          // Initialize with target metrics or tech defaults
-          const initialMetrics: Record<string, string> = {};
-          
-          if (parsedMember.department_type === "tech") {
-            Object.keys(techMetricDefaults).forEach(key => {
-              initialMetrics[key] = "";
-            });
-          }
-          
-          if (parsedMember.target_metrics) {
-            Object.keys(parsedMember.target_metrics).forEach(key => {
-              initialMetrics[key] = "";
-            });
-          }
-          
-          setMetrics(initialMetrics);
-        }
-      }
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleMetricChange = (key: string, value: string) => {
-    setMetrics(prev => ({ ...prev, [key]: value }));
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!teamMember || !user) return;
-
-    setSubmitting(true);
-    try {
-      const metricsData = {
-        team_member_id: teamMember.id,
-        user_id: user.id,
-        date: format(new Date(), "yyyy-MM-dd"),
-        metrics,
-        notes: notes || null,
-      };
-
-      if (todayMetrics) {
-        // Update existing
-        const { error } = await supabase
-          .from("daily_metrics")
-          .update({ metrics, notes: notes || null })
-          .eq("id", todayMetrics.id);
-
-        if (error) throw error;
-
-        toast({
-          title: "Success",
-          description: "Your metrics have been updated",
-        });
-      } else {
-        // Insert new
-        const { error } = await supabase
-          .from("daily_metrics")
-          .insert(metricsData);
-
-        if (error) throw error;
-
-        toast({
-          title: "Success",
-          description: "Your daily metrics have been submitted",
-        });
-      }
-
-      fetchTeamMemberData();
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
-    } finally {
-      setSubmitting(false);
-    }
-  };
 
   const exportToPDF = () => {
     const doc = new jsPDF();
@@ -376,15 +220,14 @@ const Metrics = () => {
   }
 
   // CEO View - Team Metrics Dashboard
-  if (isCEO) {
-    const submittedCount = teamMetrics.filter(m => m.metrics !== null).length;
-    const totalCount = teamMetrics.length;
+  const submittedCount = teamMetrics.filter(m => m.metrics !== null).length;
+  const totalCount = teamMetrics.length;
 
-    return (
-      <div className="min-h-screen bg-background">
-        <Header />
-        <main className="container mx-auto px-4 py-6 sm:py-8">
-          <div className="mb-6 sm:mb-8">
+  return (
+    <div className="min-h-screen bg-background">
+      <Header />
+      <main className="container mx-auto px-4 py-6 sm:py-8">
+        <div className="mb-6 sm:mb-8">
             <h2 className="text-2xl sm:text-3xl font-bold mb-1 sm:mb-2">Team Metrics</h2>
             <p className="text-sm sm:text-base text-muted-foreground">
               View daily performance metrics submitted by your team
@@ -441,6 +284,12 @@ const Metrics = () => {
                         </CardDescription>
                       </div>
                       <div className="flex flex-wrap gap-2">
+                        {member.hasReport && (
+                          <Badge variant="default" className="w-fit bg-blue-600 hover:bg-blue-700">
+                            <FileText className="h-3 w-3 mr-1" />
+                            Report at {format(new Date(member.reportTime!), "h:mm a")}
+                          </Badge>
+                        )}
                         {member.hasCheckIn && (
                           <Badge variant="default" className="w-fit bg-primary hover:bg-primary/90">
                             <FileCheck className="h-3 w-3 mr-1" />
@@ -455,7 +304,7 @@ const Metrics = () => {
                         ) : (
                           <Badge variant="secondary" className="w-fit">
                             <AlertCircle className="h-3 w-3 mr-1" />
-                            Metrics not submitted
+                            No report submitted
                           </Badge>
                         )}
                       </div>
@@ -497,109 +346,6 @@ const Metrics = () => {
         <Footer />
       </div>
     );
-  }
-
-  // Team Member View - Submit Own Metrics
-  if (!teamMember) {
-    return (
-      <div className="min-h-screen bg-background flex flex-col">
-        <Header />
-        <main className="flex-1 container mx-auto px-4 py-6 sm:py-8">
-          <Card>
-            <CardContent className="flex flex-col items-center justify-center py-12">
-              <AlertCircle className="h-12 w-12 text-muted-foreground mb-4" />
-              <p className="text-muted-foreground text-center">
-                Your account is not linked to a team member profile.
-                <br />
-                Please contact your manager to set up your profile.
-              </p>
-            </CardContent>
-          </Card>
-        </main>
-        <Footer />
-      </div>
-    );
-  }
-
-  return (
-    <div className="min-h-screen bg-background">
-      <Header />
-
-      <main className="container mx-auto px-4 py-6 sm:py-8">
-        <div className="mb-6 sm:mb-8">
-          <h2 className="text-2xl sm:text-3xl font-bold mb-1 sm:mb-2">Daily Metrics</h2>
-          <p className="text-sm sm:text-base text-muted-foreground">
-            Submit your performance metrics for {format(new Date(), "MMMM d, yyyy")}
-          </p>
-        </div>
-
-        {todayMetrics && (
-          <Card className="mb-6 border-success/50 bg-success/5">
-            <CardContent className="flex items-center gap-3 py-4">
-              <CheckCircle className="h-5 w-5 text-success" />
-              <p className="text-sm text-success">
-                You've already submitted metrics today at{" "}
-                {format(new Date(todayMetrics.submitted_at), "h:mm a")}. You can update them below.
-              </p>
-            </CardContent>
-          </Card>
-        )}
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Your Metrics</CardTitle>
-            <CardDescription>
-              {teamMember.name} • {teamMember.role}
-              {teamMember.department_type === "tech" && " • Tech Team"}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="grid gap-4 sm:grid-cols-2">
-                {Object.keys(metrics).map((key) => (
-                  <div key={key} className="space-y-2">
-                    <Label htmlFor={key}>{key}</Label>
-                    <Input
-                      id={key}
-                      type="text"
-                      value={metrics[key]}
-                      onChange={(e) => handleMetricChange(key, e.target.value)}
-                      placeholder={`Enter ${key.toLowerCase()}`}
-                    />
-                  </div>
-                ))}
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="notes">Notes (Optional)</Label>
-                <Textarea
-                  id="notes"
-                  value={notes}
-                  onChange={(e) => setNotes(e.target.value)}
-                  placeholder="Any additional notes about your day..."
-                  rows={4}
-                />
-              </div>
-
-              <Button type="submit" disabled={submitting} className="w-full sm:w-auto">
-                {submitting ? (
-                  <>
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    Submitting...
-                  </>
-                ) : todayMetrics ? (
-                  "Update Metrics"
-                ) : (
-                  "Submit Metrics"
-                )}
-              </Button>
-            </form>
-          </CardContent>
-        </Card>
-      </main>
-      <Footer />
-    </div>
-  );
 };
 
 export default Metrics;
