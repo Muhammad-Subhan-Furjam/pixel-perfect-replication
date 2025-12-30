@@ -77,12 +77,12 @@ const Dashboard = () => {
       // Fetch recent check-ins with team member info
       const { data: checkInsData, error: checkInsError } = await supabase
         .from("check_ins")
-        .select("*, team_members(name, role)")
+        .select("*, team_members!fk_check_ins_team_member(name, role)")
         .order("created_at", { ascending: false })
         .limit(10);
 
       if (checkInsError) throw checkInsError;
-      setCheckIns(checkInsData || []);
+      setCheckIns(checkInsData as any || []);
     } catch (error: any) {
       toast({
         title: "Error",

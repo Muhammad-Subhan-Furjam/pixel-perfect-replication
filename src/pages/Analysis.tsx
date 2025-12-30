@@ -49,8 +49,8 @@ const Analysis = () => {
           reason,
           message,
           next_step,
-          check_ins (
-            team_members (
+          check_ins!inner (
+            team_members!fk_check_ins_team_member (
               name,
               role
             )
