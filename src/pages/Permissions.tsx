@@ -8,7 +8,7 @@ import { Header } from "@/components/Header";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Shield, UserCog, Users, Crown, Briefcase } from "lucide-react";
+import { Loader2, Shield, Users, Crown, Briefcase } from "lucide-react";
 import Footer from "@/components/Footer";
 
 interface UserWithRole {
@@ -259,39 +259,46 @@ const Permissions = () => {
       <Header />
 
       <main className="container mx-auto px-4 py-6 sm:py-8">
-        <div className="mb-6 sm:mb-8">
-          <h2 className="text-2xl sm:text-3xl font-bold mb-1 sm:mb-2">Access Permissions</h2>
-          <p className="text-sm sm:text-base text-muted-foreground">
-            Manage roles and team management permissions
-          </p>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 sm:mb-8">
+          <div>
+            <h2 className="text-2xl sm:text-3xl font-bold mb-1 sm:mb-2">Access Permissions</h2>
+            <p className="text-sm sm:text-base text-muted-foreground">
+              Manage roles and team management permissions
+            </p>
+          </div>
         </div>
 
         {/* Role Assignment Info */}
         <Card className="mb-6">
           <CardHeader>
-            <div className="flex items-center gap-3">
-              <Shield className="h-5 w-5 text-primary" />
+            <div className="flex items-start justify-between">
               <div>
-                <CardTitle className="text-lg">Role & Permission Management</CardTitle>
+                <CardTitle className="flex items-center gap-2">
+                  <Shield className="h-5 w-5" />
+                  Role & Permission Management
+                </CardTitle>
                 <CardDescription>
-                  Assign HR or Executive Assistant roles and grant team management access. Only one person can hold each special role at a time.
+                  Assign HR or Executive Assistant roles and grant team management access
                 </CardDescription>
               </div>
+              <Badge variant="secondary">Active</Badge>
             </div>
           </CardHeader>
           <CardContent>
-            <div className="flex flex-wrap gap-4 text-sm">
-              <div className="flex items-center gap-2">
-                <Crown className="h-4 w-4 text-primary" />
-                <span className="text-muted-foreground">
-                  Executive Assistant: {currentEA ? (currentEA.full_name || currentEA.email) : "Not assigned"}
-                </span>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground mb-1">Executive Assistant</p>
+                <div className="flex items-center gap-2">
+                  <Crown className="h-4 w-4 text-primary" />
+                  <p className="font-medium">{currentEA ? (currentEA.full_name || currentEA.email) : "Not assigned"}</p>
+                </div>
               </div>
-              <div className="flex items-center gap-2">
-                <Briefcase className="h-4 w-4 text-primary" />
-                <span className="text-muted-foreground">
-                  HR: {currentHR ? (currentHR.full_name || currentHR.email) : "Not assigned"}
-                </span>
+              <div>
+                <p className="text-sm font-medium text-muted-foreground mb-1">HR</p>
+                <div className="flex items-center gap-2">
+                  <Briefcase className="h-4 w-4 text-primary" />
+                  <p className="font-medium">{currentHR ? (currentHR.full_name || currentHR.email) : "Not assigned"}</p>
+                </div>
               </div>
             </div>
           </CardContent>
@@ -313,34 +320,25 @@ const Permissions = () => {
             </CardContent>
           </Card>
         ) : (
-          <div className="space-y-4">
+          <div className="grid gap-6">
             {users.map((userData) => (
               <Card key={userData.id}>
-                <CardContent className="flex flex-col gap-4 py-4">
-                  {/* User Info Row */}
-                  <div className="flex items-center gap-4">
-                    <div className="h-10 w-10 rounded-full bg-secondary flex items-center justify-center">
-                      <UserCog className="h-5 w-5 text-muted-foreground" />
+                <CardHeader>
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <CardTitle>{userData.full_name || userData.email}</CardTitle>
+                      <CardDescription>{userData.email}</CardDescription>
                     </div>
-                    <div className="flex-1">
-                      <p className="font-medium">
-                        {userData.full_name || userData.email}
-                      </p>
-                      <div className="flex items-center gap-2 mt-1">
-                        <p className="text-sm text-muted-foreground">{userData.email}</p>
-                        <Badge variant={getRoleBadgeVariant(userData.role)} className="flex items-center gap-1">
-                          {getRoleIcon(userData.role)}
-                          {formatRole(userData.role)}
-                        </Badge>
-                      </div>
-                    </div>
+                    <Badge variant={getRoleBadgeVariant(userData.role)} className="flex items-center gap-1">
+                      {getRoleIcon(userData.role)}
+                      {formatRole(userData.role)}
+                    </Badge>
                   </div>
-
-                  {/* Controls Row */}
-                  <div className="flex flex-col sm:flex-row sm:items-center gap-4 pl-14">
-                    {/* Role Selection */}
-                    <div className="flex items-center gap-2">
-                      <Label className="text-sm whitespace-nowrap">Role:</Label>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
+                    <div>
+                      <p className="text-sm font-medium text-muted-foreground mb-1">Role Assignment</p>
                       {savingRole === userData.id ? (
                         <Loader2 className="h-4 w-4 animate-spin" />
                       ) : (
@@ -348,7 +346,7 @@ const Permissions = () => {
                           value={userData.role}
                           onValueChange={(value) => handleRoleChange(userData.id, value as AppRole)}
                         >
-                          <SelectTrigger className="w-[180px]">
+                          <SelectTrigger className="w-full">
                             <SelectValue placeholder="Select role" />
                           </SelectTrigger>
                           <SelectContent>
@@ -369,23 +367,26 @@ const Permissions = () => {
                         </Select>
                       )}
                     </div>
-
-                    {/* Team Management Toggle */}
-                    <div className="flex items-center gap-3">
-                      <Label htmlFor={`permission-${userData.id}`} className="text-sm">
-                        Can manage team
-                      </Label>
-                      {saving === userData.id ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                      ) : (
-                        <Switch
-                          id={`permission-${userData.id}`}
-                          checked={userData.can_manage_team}
-                          onCheckedChange={() =>
-                            handleTogglePermission(userData.id, userData.can_manage_team)
-                          }
-                        />
-                      )}
+                    <div>
+                      <p className="text-sm font-medium text-muted-foreground mb-1">Team Management</p>
+                      <div className="flex items-center gap-3 pt-2">
+                        {saving === userData.id ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <>
+                            <Switch
+                              id={`permission-${userData.id}`}
+                              checked={userData.can_manage_team}
+                              onCheckedChange={() =>
+                                handleTogglePermission(userData.id, userData.can_manage_team)
+                              }
+                            />
+                            <Label htmlFor={`permission-${userData.id}`} className="text-sm">
+                              {userData.can_manage_team ? "Enabled" : "Disabled"}
+                            </Label>
+                          </>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </CardContent>
