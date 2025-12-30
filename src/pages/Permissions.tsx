@@ -42,7 +42,20 @@ const Permissions = () => {
   const fetchUsersWithPermissions = async () => {
     setLoading(true);
     try {
-      // Get all profiles with their roles and permissions
+      // Get team members who have linked auth accounts
+      const { data: teamMembers, error: teamError } = await supabase
+        .from("team_members")
+        .select("auth_user_id, name, email")
+        .not("auth_user_id", "is", null);
+
+      if (teamError) throw teamError;
+
+      // Get the auth_user_ids of actual team members
+      const teamMemberAuthIds = new Set(
+        (teamMembers || []).map((tm) => tm.auth_user_id).filter(Boolean)
+      );
+
+      // Get profiles only for team members with auth accounts
       const { data: profiles, error: profilesError } = await supabase
         .from("profiles")
         .select("id, email, full_name");
@@ -63,17 +76,18 @@ const Permissions = () => {
 
       if (permissionsError) throw permissionsError;
 
-      // Combine data
+      // Combine data - only include users who are team members
       const usersData: UserWithRole[] = (profiles || [])
-        .filter((p) => p.id !== user?.id) // Exclude current user (CEO)
+        .filter((p) => p.id !== user?.id && teamMemberAuthIds.has(p.id)) // Only team members, exclude CEO
         .map((profile) => {
           const userRole = roles?.find((r) => r.user_id === profile.id);
           const userPermission = permissions?.find((p) => p.user_id === profile.id);
+          const teamMember = teamMembers?.find((tm) => tm.auth_user_id === profile.id);
 
           return {
             id: profile.id,
-            email: profile.email || "No email",
-            full_name: profile.full_name,
+            email: profile.email || teamMember?.email || "No email",
+            full_name: profile.full_name || teamMember?.name,
             role: userRole?.role || "team_member",
             can_manage_team: userPermission?.can_manage_team || false,
           };
