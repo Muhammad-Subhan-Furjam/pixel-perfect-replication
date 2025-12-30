@@ -321,10 +321,15 @@ const Metrics = () => {
                         </CardDescription>
                       </div>
                       <div className="flex flex-wrap gap-2">
-                        {member.hasReport && (
-                          <Badge variant="default" className="w-fit bg-blue-600 hover:bg-blue-700">
+                        {member.hasReport ? (
+                          <Badge variant="default" className="w-fit bg-green-600 hover:bg-green-700">
                             <FileText className="h-3 w-3 mr-1" />
-                            Report at {format(new Date(member.reportTime!), "h:mm a")}
+                            Submitted
+                          </Badge>
+                        ) : (
+                          <Badge variant="secondary" className="w-fit">
+                            <AlertCircle className="h-3 w-3 mr-1" />
+                            Report not submitted
                           </Badge>
                         )}
                         {member.hasCheckIn && (
@@ -333,17 +338,12 @@ const Metrics = () => {
                             Analyzed at {format(new Date(member.checkInTime!), "h:mm a")}
                           </Badge>
                         )}
-                        {member.metrics ? (
+                        {member.metrics && (
                           <Badge variant="default" className="w-fit bg-success hover:bg-success/90">
                             <CheckCircle className="h-3 w-3 mr-1" />
                             Metrics at {format(new Date(member.submitted_at!), "h:mm a")}
                           </Badge>
-                        ) : !member.hasReport ? (
-                          <Badge variant="secondary" className="w-fit">
-                            <AlertCircle className="h-3 w-3 mr-1" />
-                            Report not submitted
-                          </Badge>
-                        ) : null}
+                        )}
                       </div>
                     </div>
                   </CardHeader>
