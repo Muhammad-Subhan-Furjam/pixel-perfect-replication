@@ -9,11 +9,12 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useUserRole } from "@/hooks/useUserRole";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, CheckCircle, AlertCircle, Users, Calendar } from "lucide-react";
+import { Loader2, CheckCircle, AlertCircle, Users, Calendar, Download } from "lucide-react";
 import { format } from "date-fns";
 import Footer from "@/components/Footer";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import jsPDF from "jspdf";
 
 interface TeamMember {
   id: string;
@@ -254,6 +255,85 @@ const Metrics = () => {
     }
   };
 
+  const exportToPDF = () => {
+    const doc = new jsPDF();
+    const dateStr = format(new Date(selectedDate), "MMMM d, yyyy");
+    
+    // Title
+    doc.setFontSize(20);
+    doc.text("Daily Metrics Report", 20, 20);
+    
+    doc.setFontSize(12);
+    doc.text(`Date: ${dateStr}`, 20, 30);
+    
+    const submittedCount = teamMetrics.filter(m => m.metrics !== null).length;
+    doc.text(`Submitted: ${submittedCount} of ${teamMetrics.length} team members`, 20, 38);
+    
+    let yPos = 50;
+    
+    teamMetrics.forEach((member) => {
+      // Check if we need a new page
+      if (yPos > 260) {
+        doc.addPage();
+        yPos = 20;
+      }
+      
+      // Member header
+      doc.setFontSize(14);
+      doc.setFont("helvetica", "bold");
+      doc.text(member.name, 20, yPos);
+      
+      doc.setFontSize(10);
+      doc.setFont("helvetica", "normal");
+      const roleText = `${member.role}${member.department_type === "tech" ? " • Tech Team" : ""}`;
+      doc.text(roleText, 20, yPos + 6);
+      
+      yPos += 12;
+      
+      if (member.metrics) {
+        doc.setFontSize(10);
+        doc.text(`Submitted at ${format(new Date(member.submitted_at!), "h:mm a")}`, 20, yPos);
+        yPos += 8;
+        
+        // Metrics table
+        Object.entries(member.metrics).forEach(([key, value]) => {
+          if (yPos > 270) {
+            doc.addPage();
+            yPos = 20;
+          }
+          doc.text(`${key}: ${value || "-"}`, 25, yPos);
+          yPos += 6;
+        });
+        
+        // Notes
+        if (member.notes) {
+          if (yPos > 250) {
+            doc.addPage();
+            yPos = 20;
+          }
+          doc.setFont("helvetica", "italic");
+          doc.text(`Notes: ${member.notes}`, 25, yPos);
+          doc.setFont("helvetica", "normal");
+          yPos += 8;
+        }
+      } else {
+        doc.setTextColor(150, 150, 150);
+        doc.text("Not submitted", 20, yPos);
+        doc.setTextColor(0, 0, 0);
+        yPos += 6;
+      }
+      
+      yPos += 10;
+    });
+    
+    doc.save(`metrics-report-${selectedDate}.pdf`);
+    
+    toast({
+      title: "PDF Exported",
+      description: `Metrics report for ${dateStr} has been downloaded`,
+    });
+  };
+
   if (loading || roleLoading) {
     return (
       <div className="min-h-screen bg-background flex flex-col">
@@ -298,6 +378,15 @@ const Metrics = () => {
                 {submittedCount} of {totalCount} submitted
               </span>
             </div>
+            <Button 
+              variant="outline" 
+              onClick={exportToPDF}
+              disabled={teamMetrics.length === 0}
+              className="ml-auto"
+            >
+              <Download className="h-4 w-4 mr-2" />
+              Export PDF
+            </Button>
           </div>
 
           {teamMetrics.length === 0 ? (
