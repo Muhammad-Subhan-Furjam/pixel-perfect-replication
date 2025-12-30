@@ -23,3 +23,6 @@ verify_jwt = true
 
 [functions.send-report-reminders]
 verify_jwt = false
+
+[functions.send-role-assignment-email]
+verify_jwt = true
