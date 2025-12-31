@@ -26,12 +26,14 @@ const RoleProtectedRoute = ({
 
   // Check role access
   if (allowedRoles && role && !allowedRoles.includes(role)) {
-    return <Navigate to={role === "ceo" ? "/dashboard" : "/metrics"} replace />;
+    return <Navigate to={role === "ceo" ? "/dashboard" : "/reports"} replace />;
   }
 
   // Check team management permission
-  if (requireTeamManagement && !canManageTeam) {
-    return <Navigate to={role === "ceo" ? "/dashboard" : "/metrics"} replace />;
+  // CEO, HR, and EA automatically have team management access
+  const hasTeamAccess = role === "ceo" || role === "hr" || role === "executive_assistant" || canManageTeam;
+  if (requireTeamManagement && !hasTeamAccess) {
+    return <Navigate to="/reports" replace />;
   }
 
   return <>{children}</>;
