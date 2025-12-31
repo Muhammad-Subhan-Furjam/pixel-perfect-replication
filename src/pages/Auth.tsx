@@ -13,6 +13,7 @@ import logo from "@/assets/logo.png";
 import { LogOut } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import Footer from "@/components/Footer";
+import SEO from "@/components/SEO";
 
 const sendWelcomeEmail = async (email: string, fullName: string) => {
   try {
@@ -132,7 +133,17 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <>
+      <SEO 
+        title={isLogin ? "Sign In to WorkChief" : "Create Account | WorkChief"}
+        description={isLogin 
+          ? "Sign in to your WorkChief dashboard to manage team performance, track daily check-ins, and get AI-powered insights."
+          : "Create your WorkChief account and start tracking team performance with AI-powered analytics and executive briefings."
+        }
+        keywords="WorkChief login, sign in, create account, team management, AI dashboard"
+        canonical="https://workchief.ai/auth"
+      />
+      <div className="min-h-screen bg-background flex flex-col">
       <div className="flex-1 flex items-center justify-center p-4">
         <Card className="w-full max-w-md">
         <CardHeader className="text-center">
@@ -245,7 +256,8 @@ const Auth = () => {
       </Card>
       </div>
       <Footer />
-    </div>
+      </div>
+    </>
   );
 };
 

@@ -3,10 +3,18 @@ import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import logo from "@/assets/logo.png";
 import Footer from "@/components/Footer";
+import SEO from "@/components/SEO";
 
 const PrivacyPolicy = () => {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-card">
+    <>
+      <SEO 
+        title="Privacy Policy"
+        description="Learn how WorkChief collects, uses, and protects your personal information. Our privacy policy explains data handling practices for our AI-powered operations management platform."
+        keywords="privacy policy, data protection, GDPR, personal information, WorkChief privacy"
+        canonical="https://workchief.ai/privacy-policy"
+      />
+      <div className="min-h-screen bg-gradient-to-br from-background via-background to-card">
       <header className="container mx-auto px-3 sm:px-4 py-4 sm:py-6">
         <div className="flex items-center justify-between gap-2">
           <Link to="/" className="flex items-center space-x-2 sm:space-x-3">
@@ -172,7 +180,8 @@ const PrivacyPolicy = () => {
         </div>
       </main>
       <Footer />
-    </div>
+      </div>
+    </>
   );
 };
 

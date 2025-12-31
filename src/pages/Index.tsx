@@ -3,8 +3,22 @@ import { ArrowRight, BarChart3, Users, Zap } from "lucide-react";
 import { Link } from "react-router-dom";
 import logo from "@/assets/logo.png";
 import Footer from "@/components/Footer";
+import SEO from "@/components/SEO";
 
 const Index = () => {
+  const homeStructuredData = {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "WorkChief - AI-Powered Operations Management",
+    "description": "Transform daily team updates into actionable insights with AI-powered performance analysis.",
+    "url": "https://workchief.ai/",
+    "mainEntity": {
+      "@type": "SoftwareApplication",
+      "name": "WorkChief",
+      "applicationCategory": "BusinessApplication",
+      "operatingSystem": "Web"
+    }
+  };
   const features = [
     {
       icon: Users,
@@ -24,7 +38,15 @@ const Index = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-card flex flex-col">
+    <>
+      <SEO 
+        title="WorkChief - AI-Powered Operations Management | Team Performance Tracking"
+        description="Transform daily team updates into actionable insights with AI-powered performance analysis, blocker detection, and executive briefings. Your AI Chief Operating Officer."
+        keywords="AI operations management, team performance tracking, executive briefings, daily check-ins, blocker detection, CEO dashboard, HR analytics"
+        canonical="https://workchief.ai/"
+        structuredData={homeStructuredData}
+      />
+      <div className="min-h-screen bg-gradient-to-br from-background via-background to-card flex flex-col">
       <header className="container mx-auto px-4 py-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
@@ -78,7 +100,8 @@ const Index = () => {
       </main>
 
       <Footer />
-    </div>
+      </div>
+    </>
   );
 };
 
