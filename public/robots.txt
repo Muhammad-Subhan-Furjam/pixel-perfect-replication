@@ -1,3 +1,11 @@
+# WorkChief Robots.txt
+# https://workchief.ai
+
+# Allow all crawlers
+User-agent: *
+Allow: /
+
+# Allow specific crawlers
 User-agent: Googlebot
 Allow: /
 
@@ -10,5 +18,24 @@ Allow: /
 User-agent: facebookexternalhit
 Allow: /
 
-User-agent: *
+User-agent: LinkedInBot
 Allow: /
+
+# Disallow protected/internal routes from indexing
+Disallow: /dashboard
+Disallow: /team
+Disallow: /check-ins
+Disallow: /metrics
+Disallow: /analytics
+Disallow: /analysis
+Disallow: /reports
+Disallow: /settings
+Disallow: /permissions
+Disallow: /subscription
+Disallow: /subscribers
+
+# Sitemap location
+Sitemap: https://workchief.ai/sitemap.xml
+
+# Host
+Host: https://workchief.ai
