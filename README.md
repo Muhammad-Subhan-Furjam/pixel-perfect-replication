@@ -1,73 +1,189 @@
-# Welcome to your Lovable project
+# WorkChief
 
-## Project info
+<p align="center">
+  <img src="src/assets/logo.png" alt="WorkChief Logo" width="120" height="120">
+</p>
 
-**URL**: https://lovable.dev/projects/38b988b8-4114-48fb-8614-71a756f72c60
+<h3 align="center">Your AI Chief Operating Officer</h3>
 
-## How can I edit this code?
+<p align="center">
+  Transform daily team updates into actionable insights with AI-powered performance analysis.
+</p>
 
-There are several ways of editing your application.
+<p align="center">
+  <a href="https://workchief.ai">Website</a> •
+  <a href="#features">Features</a> •
+  <a href="#getting-started">Getting Started</a> •
+  <a href="#documentation">Documentation</a>
+</p>
 
-**Use Lovable**
+---
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/38b988b8-4114-48fb-8614-71a756f72c60) and start prompting.
+## Overview
 
-Changes made via Lovable will be committed automatically to this repo.
+WorkChief is an AI-powered operations management platform that helps executives, HR managers, and team leaders track team performance, detect blockers, and make data-driven decisions.
 
-**Use your preferred IDE**
+## Features
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+- 👥 **Team Management** - Add and manage team members with customizable target metrics
+- 📊 **Daily Metrics Tracking** - Automated check-ins with real-time status updates
+- 🤖 **AI-Powered Analysis** - Smart performance scoring (🟢/🟡/🔴) with blocker detection
+- 📈 **Executive Dashboards** - CEO-level overviews with actionable insights
+- 📋 **Report Management** - Team member report submissions and processing
+- 📉 **Analytics** - Performance trends and data visualization
+- 🔐 **Role-Based Access** - CEO, HR, Executive Assistant, and Team Member roles
+- 💳 **Subscription Management** - Stripe-powered billing and plans
+- 📧 **Email Notifications** - Automated reminders and updates
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+## Tech Stack
 
-Follow these steps:
+- **Frontend**: React 18, TypeScript, Vite, Tailwind CSS
+- **UI Components**: shadcn/ui, Radix UI primitives
+- **Backend**: Lovable Cloud (PostgreSQL, Auth, Edge Functions)
+- **AI**: OpenAI GPT for performance analysis
+- **Payments**: Stripe
+- **Deployment**: Vercel / Apache compatible
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+## Getting Started
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+### Prerequisites
 
-# Step 3: Install the necessary dependencies.
-npm i
+- Node.js 18+ and npm
+- Git
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+### Installation
+
+1. Clone the repository:
+```bash
+git clone https://github.com/your-org/workchief.git
+cd workchief
+```
+
+2. Install dependencies:
+```bash
+npm install
+```
+
+3. Start the development server:
+```bash
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+4. Open [http://localhost:5173](http://localhost:5173) in your browser
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+### Environment Variables
 
-**Use GitHub Codespaces**
+The following variables are automatically configured by Lovable Cloud:
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+```env
+VITE_SUPABASE_URL=your_supabase_url
+VITE_SUPABASE_PUBLISHABLE_KEY=your_anon_key
+VITE_SUPABASE_PROJECT_ID=your_project_id
+```
 
-## What technologies are used for this project?
+## Project Structure
 
-This project is built with:
+```
+workchief/
+├── docs/                      # Documentation
+│   ├── USER_GUIDE.md          # End-user guide
+│   └── TECHNICAL_DOCUMENTATION.md  # Developer docs
+├── public/                    # Static assets
+├── src/
+│   ├── assets/                # Images, fonts
+│   ├── components/            # React components
+│   │   └── ui/                # shadcn/ui components
+│   ├── contexts/              # React contexts
+│   ├── hooks/                 # Custom hooks
+│   ├── integrations/          # External integrations
+│   ├── lib/                   # Utility functions
+│   └── pages/                 # Page components
+├── supabase/
+│   └── functions/             # Edge functions
+└── ...config files
+```
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+## Documentation
 
-## How can I deploy this project?
+- [User Guide](docs/USER_GUIDE.md) - Comprehensive guide for end users
+- [Technical Documentation](docs/TECHNICAL_DOCUMENTATION.md) - Developer reference
 
-Simply open [Lovable](https://lovable.dev/projects/38b988b8-4114-48fb-8614-71a756f72c60) and click on Share -> Publish.
+## User Roles
 
-## Can I connect a custom domain to my Lovable project?
+| Role | Description |
+|------|-------------|
+| **CEO** | Full access to all features including permissions management |
+| **HR** | Access to team management, check-ins, analytics |
+| **Executive Assistant** | Same as HR - supports CEO operations |
+| **Team Member** | Submit metrics and reports, view own data |
 
-Yes, you can!
+## Key Pages
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+| Page | Path | Access |
+|------|------|--------|
+| Landing | `/` | Public |
+| Dashboard | `/dashboard` | CEO, HR, EA |
+| Team Management | `/team` | CEO, HR, EA |
+| Check-ins | `/check-ins` | CEO, HR, EA |
+| Metrics | `/metrics` | All authenticated |
+| Reports | `/reports` | All authenticated |
+| Analysis | `/analysis` | CEO, HR, EA |
+| Analytics | `/analytics` | CEO, HR, EA |
+| Permissions | `/permissions` | CEO, HR, EA |
+| Settings | `/settings` | All authenticated |
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+## Scripts
+
+```bash
+# Development
+npm run dev          # Start dev server
+
+# Build
+npm run build        # Production build
+npm run preview      # Preview production build
+
+# Code Quality
+npm run lint         # Run ESLint
+npm run type-check   # TypeScript check
+```
+
+## Deployment
+
+### Lovable (Recommended)
+
+Click the "Publish" button in the Lovable editor to deploy instantly.
+
+### Vercel
+
+1. Connect your GitHub repository to Vercel
+2. Vercel will auto-detect the Vite configuration
+3. Deploy automatically on push
+
+### Manual (Apache/cPanel)
+
+1. Run `npm run build`
+2. Upload the `dist/` folder contents
+3. Configure `.htaccess` for SPA routing
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit changes (`git commit -m 'Add amazing feature'`)
+4. Push to branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## License
+
+This project is proprietary software. All rights reserved.
+
+## Support
+
+- 📧 Email: support@workchief.ai
+- 🌐 Website: [workchief.ai](https://workchief.ai)
+
+---
+
+<p align="center">
+  Built with ❤️ using <a href="https://lovable.dev">Lovable</a>
+</p>
