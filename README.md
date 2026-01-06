@@ -149,10 +149,6 @@ npm run type-check   # TypeScript check
 
 ## Deployment
 
-### Lovable (Recommended)
-
-Click the "Publish" button in the Lovable editor to deploy instantly.
-
 ### Vercel
 
 1. Connect your GitHub repository to Vercel
@@ -183,7 +179,3 @@ This project is proprietary software. All rights reserved.
 - 🌐 Website: [workchief.ai](https://workchief.ai)
 
 ---
-
-<p align="center">
-  Built with ❤️ using <a href="https://lovable.dev">Lovable</a>
-</p>
