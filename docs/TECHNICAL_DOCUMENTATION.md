@@ -33,7 +33,7 @@ WorkChief follows a modern JAMstack architecture:
                               │
                               ▼
 ┌─────────────────────────────────────────────────────────────┐
-│                      Lovable Cloud                          │
+│                      Cloud                                 │
 │  ┌─────────────┐ ┌─────────────┐ ┌─────────────────────┐   │
 │  │   Database  │ │    Auth     │ │   Edge Functions    │   │
 │  │ (PostgreSQL)│ │  (Supabase) │ │       (Deno)        │   │
@@ -68,7 +68,7 @@ WorkChief follows a modern JAMstack architecture:
 | React Hook Form | 7.x | Form handling |
 | Zod | 3.x | Schema validation |
 
-### Backend (Lovable Cloud)
+### Backend (Cloud)
 
 | Technology | Purpose |
 |------------|---------|
