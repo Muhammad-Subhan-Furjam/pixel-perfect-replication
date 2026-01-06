@@ -73,7 +73,7 @@ npm run dev
 
 ### Environment Variables
 
-The following variables are automatically configured by Lovable Cloud:
+The following variables are automatically configured:
 
 ```env
 VITE_SUPABASE_URL=your_supabase_url
